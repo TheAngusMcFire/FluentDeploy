@@ -1,4 +1,4 @@
-namespace FluentDeploy
+namespace FluentDeploy.Execution
 {
     public class ExecutionManager
     {

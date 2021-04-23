@@ -1,5 +1,6 @@
 using System.IO;
 using FluentDeploy.Commands.Validation;
+using FluentDeploy.Execution;
 
 namespace FluentDeploy.Commands
 {
@@ -18,7 +19,11 @@ namespace FluentDeploy.Commands
         public static ConsoleCommand AsUser(string executableName) => new ()
             { ExecutableName = executableName, WithRoot = true };
 
-        
+        private ConsoleCommand()
+        {
+            DefaultValidator();
+        }
+
         public ConsoleCommand WithArguments(string[] arguments)
         {
             Arguments = arguments;

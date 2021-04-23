@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace FluentDeploy
+namespace FluentDeploy.Execution
 {
     public interface ICommandExecutionValidator
     {

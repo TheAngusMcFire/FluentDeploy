@@ -1,3 +1,5 @@
+using FluentDeploy.Execution;
+
 namespace FluentDeploy.Commands
 {
     public abstract class BaseCommand

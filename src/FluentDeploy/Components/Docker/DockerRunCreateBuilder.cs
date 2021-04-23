@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using FluentDeploy.Commands;
+using FluentDeploy.Execution;
 
 namespace FluentDeploy.Components.Docker
 {

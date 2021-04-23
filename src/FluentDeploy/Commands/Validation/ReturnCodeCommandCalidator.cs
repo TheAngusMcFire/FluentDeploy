@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using FluentDeploy.Execution;
 
 namespace FluentDeploy.Commands.Validation
 {

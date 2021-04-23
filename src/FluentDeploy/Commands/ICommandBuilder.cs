@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FluentDeploy.Execution;
 
 namespace FluentDeploy.Commands
 {
