@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentDeploy", "src\FluentDeploy\FluentDeploy.csproj", "{31F14D4A-B8BE-4684-BC5F-5DC8453466E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentDeployExample", "src\FluentDeployExample\FluentDeployExample.csproj", "{FF5F92B4-F7E4-47CD-BDE0-9E39744A39EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{31F14D4A-B8BE-4684-BC5F-5DC8453466E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31F14D4A-B8BE-4684-BC5F-5DC8453466E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31F14D4A-B8BE-4684-BC5F-5DC8453466E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31F14D4A-B8BE-4684-BC5F-5DC8453466E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF5F92B4-F7E4-47CD-BDE0-9E39744A39EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF5F92B4-F7E4-47CD-BDE0-9E39744A39EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF5F92B4-F7E4-47CD-BDE0-9E39744A39EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF5F92B4-F7E4-47CD-BDE0-9E39744A39EF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
