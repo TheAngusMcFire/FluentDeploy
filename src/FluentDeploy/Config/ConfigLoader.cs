@@ -9,6 +9,42 @@ namespace FluentDeploy.Config
 {
     public class ConfigLoader
     {
+        private List<HostConfig> _hostConfigs;
+
+        public ConfigLoader(List<HostConfig> hostConfigs)
+        {
+            _hostConfigs = hostConfigs;
+        }
+
+        public void LoadHostConfig(string fileName)
+        {
+            using var input = File.OpenText(fileName); 
+
+            var deserializer = new DeserializerBuilder().Build();
+            var parser = new Parser(input);
+            parser.Consume<StreamStart>();
+            parser.Accept<DocumentStart>(out var _);
+            var hosts = deserializer.Deserialize<Dictionary<string, List<HostConfig>>>(parser);
+            parser.Accept<DocumentStart>(out var _);
+            var vars = deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
+        }
+
+        public void LoadHostConfigs(params string[] fileNames)
+        {
+            
+        }
+
+        public void LoadVariableFiles(params string[] fileNames)
+        {
+            
+        }
+
+        public BasicConfig GetFinishedConfig()
+        {
+            return null;
+        }
+
+
         public static BasicConfig Load(string filePath)
         {
             using var input = File.OpenText(filePath); 
