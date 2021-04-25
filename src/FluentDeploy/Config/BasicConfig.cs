@@ -4,6 +4,7 @@ namespace FluentDeploy.Config
 {
     public class BasicConfig
     {
-        public List<HostConfig> Hosts { get; set; }
+        public Dictionary<string, List<HostConfig>> GroupHosts { get; set; }
+        public Dictionary<string, Dictionary<string, string>> GroupHostVars { get; set; }
     }
 }

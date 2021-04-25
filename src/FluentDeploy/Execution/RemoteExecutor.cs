@@ -14,18 +14,18 @@ namespace FluentDeploy.Execution
         
         public RemoteExecutor(HostConfig config)
         {
-            _client = new SshClient(config.HostName, config.Port, config.UserName, KeyStore.Default.PrivateKeyFiles);
-            _client.Connect();
+            //_client = new SshClient(config.Host, config.Port, config.User, KeyStore.Default.PrivateKeyFiles);
+            //_client.Connect();
         }
 
         private void ExecuteConsoleCommand(ConsoleCommand cmd)
         {
             var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x.Replace("\"", "\\\"")}'").ToArray());
-            var withRoot = cmd.WithRoot ? "sudo " : string.Empty;
-            var sshCmd = _client.CreateCommand($"{withRoot}{cmd.ExecutableName} {args}");
-            var txt = sshCmd.Execute();
-            var returnCode = sshCmd.ExitStatus;
-            cmd.Validator.Validate(returnCode, sshCmd.OutputStream);
+            //var withRoot = cmd.WithRoot ? "sudo " : string.Empty;
+            //var sshCmd = _client.CreateCommand($"{withRoot}{cmd.ExecutableName} {args}");
+            //var txt = sshCmd.Execute();
+            //var returnCode = sshCmd.ExitStatus;
+            //cmd.Validator.Validate(returnCode, sshCmd.OutputStream);
         }
         
         private void DispatchCommand(BaseCommand command)

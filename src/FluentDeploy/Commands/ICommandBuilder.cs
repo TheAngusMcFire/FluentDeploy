@@ -5,8 +5,8 @@ namespace FluentDeploy.Commands
 {
     public interface ICommandBuilder
     {
-        List<BaseCommand> BuildCommands();
+        ExecutionUnit BuildCommands(IHostInfo hostInfo);
 
-        void BuildCommands(ICommandAggregator commandAggregator);
+        void BuildCommands(ICommandContext commandContext);
     }
 }

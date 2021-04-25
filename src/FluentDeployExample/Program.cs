@@ -8,18 +8,60 @@ using FluentDeploy.Components;
 using FluentDeploy.Components.Docker;
 using FluentDeploy.Config;
 using FluentDeploy.Execution;
+using FluentDeploy.HostLogic;
+using FluentDeploy.ToolBox;
+using YamlDotNet.Serialization;
 
 namespace FluentDeployExample
 {
     class Program
     {
+
+        public class Config
+        {
+        }
+
+        public static void TestPlayBook(HostContext context, Config cfg)
+        {
+            ExecutionUnit.WithName("Copy build artefacts")
+                .AddCommand(ConsoleCommand.Exec("cargo").WithArguments("build"))
+                .AddCommand(ConsoleCommand.Exec("cp").WithArguments("./loggir/target/debug/loggir", "loggir_exe"))
+                .SaveTo(context);
+            
+            ExecutionUnit.WithName("Cleanup build artefacts")
+                .AddCommand(ConsoleCommand.Exec("rm").WithArguments("-rf",  "loggir_exe"))
+                .SaveTo(context);
+
+            //context.RunAsRoot();
+            
+            AptGet.Install("wireguard")
+                .RunAsRoot()
+                .SaveTo(context);
+            
+            
+            
+
+        }
+
+
         static void Main(string[] args)
         {
+            var config = ConfigLoader.Load("hosts.yaml");
+            
+            //var deserializer = new Deserializer();
+            //var yamlObject = deserializer.Deserialize<Dictionary<string, List<HostConfig>>>(File.ReadAllText("hosts.yaml"));
+            
+            
             KeyStore.InitKeyStore();
-            var rem = new RemoteExecutor(new HostConfig() { Port = 22, HostName = "192.168.1.106", UserName = "angus" });
+            //var rem = new RemoteExecutor(new HostConfig() { Port = 22, Host = "192.168.1.106", User = "angus" });
             
             var em = new ExecutionManager();
+
+            var host = new Host(null);
+            host.AddPlaybook(TestPlayBook, new Config());
+            host.AddPlaybook(context => TestPlayBook(context, new Config()));
             
+
             //em.Local.AddCommand(ConsoleCommand.AsUser("cargo").WithArgument("build"));
             //em.Local.AddCommand(ConsoleCommand.AsUser("cp").WithArguments(new [] {"./loggir/target/debug/loggir",  "loggir_exe"}));
             
@@ -39,7 +81,7 @@ namespace FluentDeployExample
             //    .AddPortForwarding(8081, 8080)
             //    .BuildCommands(em.Remote);
             
-            rem.ExecuteCommands(new List<BaseCommand>() { ConsoleCommand.AsRoot("ls").WithArguments( new [] {"/bin" }) });
+            //rem.ExecuteCommands(new List<BaseCommand>() { ConsoleCommand.AsRoot("ls").WithArguments( new [] {"/bin" }) });
             
             //executor.Execute();
         }

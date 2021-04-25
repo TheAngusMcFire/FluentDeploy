@@ -66,15 +66,15 @@ namespace FluentDeploy.Components.Docker
             imageName = new Uri(new Uri(_remotePath), _tagName).ToString();
             return this;
         }
-        
-        public List<BaseCommand> BuildCommands()
+
+        public ExecutionUnit BuildCommands(IHostInfo hostInfo)
         {
-            return null;
+            throw new NotImplementedException();
         }
-        
-        public void BuildCommands(ICommandAggregator commandAggregator)
+
+        public void BuildCommands(ICommandContext commandContext)
         {
-            //commandAggregator.AddCommands();
+            throw new NotImplementedException();
         }
     }
 }

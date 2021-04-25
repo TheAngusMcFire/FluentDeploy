@@ -2,9 +2,9 @@ namespace FluentDeploy.Config
 {
     public class HostConfig
     {
+        public string Name { get; set; }
         public string Description { get; set; }
-        public string HostName { get; set; }
-        public string UserName { get; set; }
-        public int Port { get; set; }
+        public string Host { get; set; }
+        public string User { get; set; }
     }
 }

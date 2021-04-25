@@ -4,7 +4,7 @@ using FluentDeploy.Execution;
 
 namespace FluentDeploy.Commands.Validation
 {
-    public class ReturnCodeCommandValidator : ICommandExecutionValidator
+    public class ReturnCodeCommandValidator //: ICommandExecutionValidator
     {
         private int _refRetCode;
 
