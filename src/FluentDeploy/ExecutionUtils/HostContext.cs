@@ -4,13 +4,14 @@ using FluentDeploy.Commands.ExecutionControlCommands;
 
 namespace FluentDeploy.Execution
 {
-    public class HostContext : ICommandContext
+    public class HostContext : ICommandContext<HostContext>, ICommandContext
     {
         private List<BaseCommand> _commands = new();
         
-        public void AddCommand(BaseCommand command)
+        public HostContext AddCommand(BaseCommand command)
         {
             _commands.Add(command);
+            return this;
         }
 
         public bool PackageManagerMirrorsUpdated { get; set; }

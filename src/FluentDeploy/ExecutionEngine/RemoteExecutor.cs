@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using FluentDeploy.Commands;
 using FluentDeploy.Config;
 using Renci.SshNet;
 
-namespace FluentDeploy.Execution
+namespace FluentDeploy.ExecutionEngine
 {
     public class RemoteExecutor
     {

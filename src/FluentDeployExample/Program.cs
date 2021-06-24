@@ -8,6 +8,7 @@ using FluentDeploy.Components;
 using FluentDeploy.Components.Docker;
 using FluentDeploy.Config;
 using FluentDeploy.Execution;
+using FluentDeploy.Extentions;
 using FluentDeploy.HostLogic;
 using FluentDeploy.ToolBox;
 using YamlDotNet.Serialization;
@@ -27,13 +28,13 @@ namespace FluentDeployExample
                 .AddCommand(ConsoleCommand.Exec("cargo").WithArguments("build"))
                 .AddCommand(ConsoleCommand.Exec("cp").WithArguments("./loggir/target/debug/loggir", "loggir_exe"))
                 .SaveTo(context);
-            
+
             ExecutionUnit.WithName("Cleanup build artefacts")
                 .AddCommand(ConsoleCommand.Exec("rm").WithArguments("-rf",  "loggir_exe"))
                 .SaveTo(context);
 
-            //context.RunAsRoot();
-            
+            context.AsRoot();
+
             AptGet.Install("wireguard")
                 .RunAsRoot()
                 .SaveTo(context);

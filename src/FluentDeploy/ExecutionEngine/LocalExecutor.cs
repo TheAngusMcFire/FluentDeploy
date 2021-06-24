@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using FluentDeploy.Commands;
+using FluentDeploy.Execution;
 
-namespace FluentDeploy.Execution
+namespace FluentDeploy.ExecutionEngine
 {
     public class LocalExecutor : ICommandAggregator
     {

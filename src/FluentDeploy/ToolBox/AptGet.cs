@@ -24,6 +24,7 @@ namespace FluentDeploy.ToolBox
             {
                 lst.Add(ConsoleCommand.Exec("apt-get")
                     .WithArguments("update"));
+                lst.Add(CommandStore.PackageManagerUpdated());
             }
 
             lst.Add(ConsoleCommand.Exec("apt-get")

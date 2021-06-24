@@ -6,8 +6,8 @@ namespace FluentDeploy.Commands
     public abstract class BaseCommandBuilder <T> where T : BaseCommandBuilder<T>
     {
         private bool _runAsRoot;
-        public string Name { get; set; }
-        public string Description { get; set; }
+        protected string Name { get; set; }
+        protected string Description { get; set; }
 
         public T RunAsRoot()
         {
@@ -19,14 +19,23 @@ namespace FluentDeploy.Commands
 
         public void SaveTo(ICommandContext context)
         {
+            var cmds = new List<BaseCommand>();
+            
             if(_runAsRoot)
             {
-                context.AddCommand(CommandStore.AsRootCommand());
+                cmds.Add(CommandStore.AsRootCommand());
+            }
+            
+            cmds.AddRange(BuildCommands(context));
+            
+            if(_runAsRoot)
+            {
+                cmds.Add(CommandStore.AsUserCommand());
             }
             
             var eu = new ExecutionUnit()
             {
-                Commands = BuildCommands(context),
+                Commands = cmds,
                 Name = Name,
                 Description = Description
             };

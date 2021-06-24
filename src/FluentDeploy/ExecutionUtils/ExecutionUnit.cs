@@ -3,7 +3,7 @@ using FluentDeploy.Commands;
 
 namespace FluentDeploy.Execution
 {
-    public class ExecutionUnit : BaseCommand
+    public class ExecutionUnit : BaseCommand, ICommandAggregator<ExecutionUnit>
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -14,7 +14,7 @@ namespace FluentDeploy.Execution
             Commands.Add(command);
             return this;
         }
-
+        
         public ExecutionUnit AddDescription(string description)
         {
             Description = description;

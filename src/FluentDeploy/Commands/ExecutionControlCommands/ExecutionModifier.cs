@@ -3,7 +3,8 @@ namespace FluentDeploy.Commands.ExecutionControlCommands
     public enum ExecutionModifierType
     {
         RunAsRoot,
-        RunAsUser
+        RunAsUser,
+        PackageManagerUpdated
     }
 
     public class ExecutionModifier : BaseCommand

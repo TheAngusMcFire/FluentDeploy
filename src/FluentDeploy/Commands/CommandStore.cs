@@ -10,5 +10,7 @@ namespace FluentDeploy.Commands
         public static ExecutionModifier AsUserCommand() => new ExecutionModifier()
             {ModifierType = ExecutionModifierType.RunAsUser};
 
+        public static ExecutionModifier PackageManagerUpdated() => new ExecutionModifier()
+            {ModifierType = ExecutionModifierType.PackageManagerUpdated};
     }
 }
