@@ -9,9 +9,9 @@ namespace FluentDeploy.Config
 {
     public class ConfigLoader
     {
-        private List<HostConfig> _hostConfigs;
+        private List<HostInformation> _hostConfigs;
 
-        public ConfigLoader(List<HostConfig> hostConfigs)
+        public ConfigLoader(List<HostInformation> hostConfigs)
         {
             _hostConfigs = hostConfigs;
         }
@@ -24,7 +24,7 @@ namespace FluentDeploy.Config
             var parser = new Parser(input);
             parser.Consume<StreamStart>();
             parser.Accept<DocumentStart>(out var _);
-            var hosts = deserializer.Deserialize<Dictionary<string, List<HostConfig>>>(parser);
+            var hosts = deserializer.Deserialize<Dictionary<string, List<HostInformation>>>(parser);
             parser.Accept<DocumentStart>(out var _);
             var vars = deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
         }
@@ -53,7 +53,7 @@ namespace FluentDeploy.Config
             var parser = new Parser(input);
             parser.Consume<StreamStart>();
             parser.Accept<DocumentStart>(out var _);
-            var hosts = deserializer.Deserialize<Dictionary<string, List<HostConfig>>>(parser);
+            var hosts = deserializer.Deserialize<Dictionary<string, List<HostInformation>>>(parser);
             parser.Accept<DocumentStart>(out var _);
             var vars = deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
 

@@ -11,7 +11,7 @@ namespace FluentDeploy.ExecutionEngine
     {
         private SshClient _client;
         
-        public RemoteExecutor(HostConfig config)
+        public RemoteExecutor(HostInformation information)
         {
             //_client = new SshClient(config.Host, config.Port, config.User, KeyStore.Default.PrivateKeyFiles);
             //_client.Connect();

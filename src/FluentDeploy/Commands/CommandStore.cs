@@ -12,5 +12,8 @@ namespace FluentDeploy.Commands
 
         public static ExecutionModifier PackageManagerUpdated() => new ExecutionModifier()
             {ModifierType = ExecutionModifierType.PackageManagerUpdated};
+        
+        public static ExecutionModifier ResetPrivilegeChange() => new ExecutionModifier()
+            {ModifierType = ExecutionModifierType.ResetPrivilegeChange};
     }
 }

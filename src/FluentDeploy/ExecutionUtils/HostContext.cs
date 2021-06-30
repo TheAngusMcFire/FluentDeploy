@@ -6,11 +6,11 @@ namespace FluentDeploy.Execution
 {
     public class HostContext : ICommandContext<HostContext>, ICommandContext
     {
-        private List<BaseCommand> _commands = new();
+        public List<BaseCommand> Commands { get; } = new();
         
         public HostContext AddCommand(BaseCommand command)
         {
-            _commands.Add(command);
+            Commands.Add(command);
             return this;
         }
 

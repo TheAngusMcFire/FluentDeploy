@@ -5,7 +5,7 @@ using FluentDeploy.Execution;
 
 namespace FluentDeploy.ToolBox
 {
-    public class AptGet : BaseCommandBuilder<AptGet>
+    public class AptGet : BaseActiveCommandBuilder<AptGet>
     {
         private List<string> _packages;
 

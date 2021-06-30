@@ -3,7 +3,12 @@ using FluentDeploy.Execution;
 
 namespace FluentDeploy.Commands
 {
-    public abstract class BaseCommandBuilder <T> where T : BaseCommandBuilder<T>
+    public interface IBaseActiveCommandBuilder
+    {
+        IList<BaseCommand> GenerateCommands(ICommandContext context);
+    }
+
+    public abstract class BaseActiveCommandBuilder <T> : BaseCommand, IBaseActiveCommandBuilder where T : BaseActiveCommandBuilder<T> 
     {
         private bool _runAsRoot;
         protected string Name { get; set; }
@@ -17,7 +22,10 @@ namespace FluentDeploy.Commands
 
         protected abstract List<BaseCommand> BuildCommands(IHostInfo hostInfo);
 
-        public void SaveTo(ICommandContext context)
+        public void SaveTo(ICommandContext context) => 
+            context.AddCommand(this);
+
+        public IList<BaseCommand> GenerateCommands(ICommandContext context)
         {
             var cmds = new List<BaseCommand>();
             
@@ -30,7 +38,7 @@ namespace FluentDeploy.Commands
             
             if(_runAsRoot)
             {
-                cmds.Add(CommandStore.AsUserCommand());
+                cmds.Add(CommandStore.ResetPrivilegeChange());
             }
             
             var eu = new ExecutionUnit()
@@ -39,8 +47,8 @@ namespace FluentDeploy.Commands
                 Name = Name,
                 Description = Description
             };
-            
-            context.AddCommand(eu);
+
+            return new List<BaseCommand>() {eu};
         }
     }
 }

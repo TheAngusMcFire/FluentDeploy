@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using FluentDeploy;
 using FluentDeploy.Commands;
 using FluentDeploy.Commands.Validation;
@@ -17,12 +18,7 @@ namespace FluentDeployExample
 {
     class Program
     {
-
-        public class Config
-        {
-        }
-
-        public static void TestPlayBook(HostContext context, Config cfg)
+        public static void TestPlayBook(HostContext context, HostConfig cfg)
         {
             ExecutionUnit.WithName("Copy build artefacts")
                 .AddCommand(ConsoleCommand.Exec("cargo").WithArguments("build"))
@@ -38,33 +34,29 @@ namespace FluentDeployExample
             AptGet.Install("wireguard")
                 .RunAsRoot()
                 .SaveTo(context);
-            
-            
-            
-
         }
 
 
         static void Main(string[] args)
         {
-            var config = ConfigLoader.Load("hosts.yaml");
-            
-            //var deserializer = new Deserializer();
-            //var yamlObject = deserializer.Deserialize<Dictionary<string, List<HostConfig>>>(File.ReadAllText("hosts.yaml"));
-            
-            
             KeyStore.InitKeyStore();
+            var config = ConfigLoader.Load("hosts.yaml");
+
+            var hosts = config.GetUngroupedHosts()
+                .Select(x => new Host(x)
+                    .AddPlaybook(TestPlayBook)
+                    .AddPlaybook(TestPlayBook)
+                    .AddPlaybook(TestPlayBook))
+                .ToList();
+                
+            
             //var rem = new RemoteExecutor(new HostConfig() { Port = 22, Host = "192.168.1.106", User = "angus" });
             
             var em = new ExecutionManager();
 
             var host = new Host(null);
-            host.AddPlaybook(TestPlayBook, new Config());
-            host.AddPlaybook(context => TestPlayBook(context, new Config()));
-            
+            host.AddPlaybook(TestPlayBook);
 
-            //em.Local.AddCommand(ConsoleCommand.AsUser("cargo").WithArgument("build"));
-            //em.Local.AddCommand(ConsoleCommand.AsUser("cp").WithArguments(new [] {"./loggir/target/debug/loggir",  "loggir_exe"}));
             
             //DockerBuilder.Build(".", "loggir-image-tmp", "./docker/dockerfile_arch")
             //    .Tag("loggir-image")

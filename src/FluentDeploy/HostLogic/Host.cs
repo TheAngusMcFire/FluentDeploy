@@ -7,30 +7,24 @@ namespace FluentDeploy.HostLogic
 {
     public class Host
     {
-        private readonly HostConfig _config;
-        
-        
-        
+        public HostConfig Config { get; }
+        public HostContext Context { get; } 
+
         public Host(HostConfig config)
         {
-            _config = config;
+            Config = config;
         }
 
-        public Host AddPlaybook<TCfg1>(Action<HostContext, TCfg1> playBook, TCfg1 config)
+        public Host AddPlaybook(Action<HostContext, HostConfig> playBook)
         {
-            return this;
-        }
-        
-        public Host AddPlaybook<TCfg1, TCfg2>(Action<HostContext, TCfg1> playBook, TCfg1 config1, TCfg2 config2)
-        {
+            playBook(Context, Config);
             return this;
         }
         
         public Host AddPlaybook(Action<HostContext> playBook)
         {
+            playBook(Context);
             return this;
         }
-
-
     }
 }

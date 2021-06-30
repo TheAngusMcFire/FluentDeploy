@@ -4,6 +4,7 @@ namespace FluentDeploy.Commands.ExecutionControlCommands
     {
         RunAsRoot,
         RunAsUser,
+        ResetPrivilegeChange,
         PackageManagerUpdated
     }
 

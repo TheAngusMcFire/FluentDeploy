@@ -9,13 +9,7 @@ namespace FluentDeploy.Commands
         public string ExecutableName { get; set; }
         public string[] Arguments { get; set; }
         public Stream StandardInput { get; set; }
-        //public override ICommandExecutionValidator Validator { get; set; }
 
-        //public bool WithRoot { get; set; } = false;
-
-        //public static ConsoleCommand AsRoot(string executableName) => new ()
-        //    { ExecutableName = executableName, WithRoot = true };
-//
         public static ConsoleCommand Exec(string executableName) => new ()
             { ExecutableName = executableName };
 
