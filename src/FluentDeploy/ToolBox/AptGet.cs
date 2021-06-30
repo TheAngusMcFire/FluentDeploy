@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Commands;
@@ -9,13 +10,25 @@ namespace FluentDeploy.ToolBox
     {
         private List<string> _packages;
 
-        private static string PackageList(IEnumerable<string> lst) => lst.Aggregate((s, s1) => $"{s} {s1}");
+        private string _targetCommand;
+        
+        private static string PackageList(IEnumerable<string> lst) => lst.Count() != 0 ? lst.Aggregate((s, s1) => $"{s} {s1}") : string.Empty;
         
         public static AptGet Install(params string[] packages)
         {
-            return new () {_packages =  new List<string>(packages), Name = $"Install packages: {PackageList(packages)}"};
+            return new () {_packages =  new List<string>(packages), Name = $"Install packages: {PackageList(packages)}", _targetCommand = "install"};
         }
 
+        public static AptGet Update()
+        {
+            return new () {_packages =  new List<string>(), Name = $"Update mirror", _targetCommand = "update"};
+        }
+
+        public static AptGet Upgrade()
+        {
+            return new () {_packages =  new List<string>(), Name = $"Upgrade Packages", _targetCommand = "upgrade"};
+        }
+        
         protected override List<BaseCommand> BuildCommands(IHostInfo hostInfo)
         {
             var lst = new List<BaseCommand>();
@@ -28,7 +41,7 @@ namespace FluentDeploy.ToolBox
             }
 
             lst.Add(ConsoleCommand.Exec("apt-get")
-                .WithArguments("install", "-y", PackageList(_packages)));
+                .WithArguments(_targetCommand, "-y", PackageList(_packages)));
 
             return lst;
         }

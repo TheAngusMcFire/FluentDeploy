@@ -9,8 +9,10 @@ using FluentDeploy.Components;
 using FluentDeploy.Components.Docker;
 using FluentDeploy.Config;
 using FluentDeploy.Execution;
+using FluentDeploy.ExecutionEngine;
 using FluentDeploy.Extentions;
 using FluentDeploy.HostLogic;
+using FluentDeploy.Logging;
 using FluentDeploy.ToolBox;
 using YamlDotNet.Serialization;
 
@@ -35,37 +37,56 @@ namespace FluentDeployExample
                 .RunAsRoot()
                 .SaveTo(context);
         }
-
+        
+        
+        public static void AptInstallPlayBook(HostContext context, HostConfig cfg)
+        {
+            context.AsRoot();
+            
+            AptGet.Upgrade()
+                .SaveTo(context);
+            
+            AptGet.Install("vim")
+                .SaveTo(context);
+        }
 
         static void Main(string[] args)
         {
             KeyStore.InitKeyStore();
+            Logging.UseSerilogConsole(true);
             var config = ConfigLoader.Load("hosts.yaml");
 
-            var hosts = config.GetUngroupedHosts()
-                .Select(x => new Host(x)
-                    .AddPlaybook(TestPlayBook)
-                    .AddPlaybook(TestPlayBook)
-                    .AddPlaybook(TestPlayBook))
-                .ToList();
-                
-            
+            var hostConfig = config.GetUngroupedHostConfig("home_server");
+            var host = new Host(hostConfig);
+            host.AddPlaybook(AptInstallPlayBook);
+            var remoteExecutor = new RemoteExecutor(host.Config.HostInfo);
+            var engine = new ExecutionEngine(host, remoteExecutor);
+            engine.ExecuteHost();
+
+            //var hosts = config.GetUngroupedHosts()
+            //    .Select(x => new Host(x)
+            //        .AddPlaybook(TestPlayBook)
+            //        .AddPlaybook(TestPlayBook)
+            //        .AddPlaybook(TestPlayBook))
+            //    .ToList();
+            //    
+
             //var rem = new RemoteExecutor(new HostConfig() { Port = 22, Host = "192.168.1.106", User = "angus" });
-            
-            var em = new ExecutionManager();
 
-            var host = new Host(null);
-            host.AddPlaybook(TestPlayBook);
+            //var em = new ExecutionManager();
+//
+            //var host = new Host(null);
+            //host.AddPlaybook(TestPlayBook);
 
-            
+
             //DockerBuilder.Build(".", "loggir-image-tmp", "./docker/dockerfile_arch")
             //    .Tag("loggir-image")
             //    .Push("docker.rieg.tk")
             //    .GetCompleteImageUrl(out var imageName)
             //    .BuildCommands(em.Local);
-            
+
             //em.Local.AddCommand(ConsoleCommand.AsUser("rm").WithArguments( new [] {"-rf",  "loggir_exe"}));
-            
+
             //DockerBuilder.RunDetached(imageName, "loggir_service")
             //    .StopAndDeleteIfRunning()
             //    .AddNetwork("loggir-network")
@@ -73,9 +94,9 @@ namespace FluentDeployExample
             //    .AddFileMapping(Directory.GetCurrentDirectory(), "/app")
             //    .AddPortForwarding(8081, 8080)
             //    .BuildCommands(em.Remote);
-            
+
             //rem.ExecuteCommands(new List<BaseCommand>() { ConsoleCommand.AsRoot("ls").WithArguments( new [] {"/bin" }) });
-            
+
             //executor.Execute();
         }
     }

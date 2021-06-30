@@ -3,23 +3,51 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Commands;
 using FluentDeploy.Config;
+using FluentDeploy.ExecutionEngine.Interfaces;
 using Renci.SshNet;
+using Serilog;
 
 namespace FluentDeploy.ExecutionEngine
 {
-    public class RemoteExecutor
+    public class RemoteExecutor : IHostCommandExecutor
     {
         private SshClient _client;
+        private readonly ILogger _logger; 
         
         public RemoteExecutor(HostInformation information)
         {
-            //_client = new SshClient(config.Host, config.Port, config.User, KeyStore.Default.PrivateKeyFiles);
-            //_client.Connect();
+            _logger = Log.ForContext<RemoteExecutor>();
+            var hostComps = information.Host.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
+            
+            // todo validate host info and report proper error \\
+            var host = hostComps.First();
+            var port = hostComps.Select((x, i) => (x, i))
+                .Where(x => x.i == 1)
+                .Select(x => Convert.ToInt32(x.x))
+                .DefaultIfEmpty(22)
+                .First();
+            
+            _logger.Debug($"Connect to host: {information.Host}");
+            
+            _client = new SshClient(host, port, information.User, KeyStore.Default.PrivateKeyFiles);
+            _client.Connect();
+        }
+        
+        public CommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot)
+        {
+            var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x.Replace("\"", "\\\"")}'").ToArray());
+            var withRoot = asRoot ? "sudo " : string.Empty;
+            var cmdLine = $"{withRoot}{cmd.ExecutableName} {args}";
+            _logger.Debug($"Execute Command: {cmdLine}");
+            var sshCmd = _client.CreateCommand(cmdLine);
+            var txt = sshCmd.Execute();
+            var returnCode = sshCmd.ExitStatus;
+            return new CommandExecutionResult() { Success = returnCode == 0, StdoutText = txt};
         }
 
         private void ExecuteConsoleCommand(ConsoleCommand cmd)
         {
-            var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x.Replace("\"", "\\\"")}'").ToArray());
+            //var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x.Replace("\"", "\\\"")}'").ToArray());
             //var withRoot = cmd.WithRoot ? "sudo " : string.Empty;
             //var sshCmd = _client.CreateCommand($"{withRoot}{cmd.ExecutableName} {args}");
             //var txt = sshCmd.Execute();

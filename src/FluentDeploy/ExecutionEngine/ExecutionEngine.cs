@@ -13,15 +13,15 @@ namespace FluentDeploy.ExecutionEngine
     public class ExecutionEngine
     {
         private readonly ILogger _logger;
-        private readonly IHostInteractionExecutor _interactionExecutor;
+        private readonly IHostCommandExecutor _commandExecutor;
         private bool _currentRootPrivilegeModifier = false;
         private bool _savedRootPrivilegeModifier = false;
         private readonly Host _host;
 
-        public ExecutionEngine(Host host, IHostInteractionExecutor interactionExecutor)
+        public ExecutionEngine(Host host, IHostCommandExecutor commandExecutor)
         {
             _host = host;
-            _interactionExecutor = interactionExecutor;
+            _commandExecutor = commandExecutor;
             _logger = Log.ForContext<ExecutionEngine>();
         }
 
@@ -48,12 +48,16 @@ namespace FluentDeploy.ExecutionEngine
             switch (command)
             {
                 case ConsoleCommand cmd:
-                    var result = _interactionExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
+                    var result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
 
+                    _logger.Debug($"Stdout:  {result.StdoutText}");
+                    
                     if (!result.Success)
                     {
                         // todo some error handling here
                     }
+                    
+                    
 
                     return true;
                 

@@ -9,13 +9,13 @@ namespace FluentDeploy.Config
         public Dictionary<string, List<HostInformation>> GroupHosts { get; set; }
         public Dictionary<string, Dictionary<string, string>> GroupHostVars { get; set; }
 
-        public List<HostConfig> GetUngroupedHosts() 
-            => GetHostsFromGroup(StringConstants.UngroupedHostsGroupName);
+        public List<HostConfig> GetUngroupedHostConfigs() 
+            => GetHostConfigsFromGroup(StringConstants.UngroupedHostsGroupName);
 
-        public HostConfig GetUngroupedHost(string hostName) =>
-            GetUngroupedHosts().First(x => x.HostInfo.Name == hostName);
+        public HostConfig GetUngroupedHostConfig(string hostName) =>
+            GetUngroupedHostConfigs().First(x => x.HostInfo.Name == hostName);
 
-        public List<HostConfig> GetHostsFromGroup(string groupName)
+        public List<HostConfig> GetHostConfigsFromGroup(string groupName)
         {
             var hosts = new List<HostConfig>();
             var defaultHosts = GroupHosts.GetValueOrDefault(groupName, new List<HostInformation>());

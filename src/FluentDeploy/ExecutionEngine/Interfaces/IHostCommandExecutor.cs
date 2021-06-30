@@ -3,7 +3,7 @@ using Serilog;
 
 namespace FluentDeploy.ExecutionEngine.Interfaces
 {
-    public interface IHostInteractionExecutor
+    public interface IHostCommandExecutor
     {
         CommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot);
     }

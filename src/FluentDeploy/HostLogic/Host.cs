@@ -12,6 +12,7 @@ namespace FluentDeploy.HostLogic
 
         public Host(HostConfig config)
         {
+            Context = new HostContext();
             Config = config;
         }
 

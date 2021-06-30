@@ -4,7 +4,7 @@ namespace FluentDeploy.Logging
 {
     public class Logging
     {
-        public void UseSerilogConsole(bool debug = false)
+        public static void UseSerilogConsole(bool debug = false)
         {
             var config = new LoggerConfiguration()
                 .WriteTo.Console();
@@ -21,7 +21,7 @@ namespace FluentDeploy.Logging
             Log.Logger = config.CreateLogger();
         }
 
-        public void SetLoggerConfiguration(Serilog.ILogger logger)
+        public static void SetLoggerConfiguration(Serilog.ILogger logger)
         {
             Log.Logger = logger;
         }
