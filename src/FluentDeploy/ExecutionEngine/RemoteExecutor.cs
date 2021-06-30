@@ -54,39 +54,7 @@ namespace FluentDeploy.ExecutionEngine
             //var returnCode = sshCmd.ExitStatus;
             //cmd.Validator.Validate(returnCode, sshCmd.OutputStream);
         }
-        
-        private void DispatchCommand(BaseCommand command)
-        {
-            switch (command)
-            {
-                case ConsoleCommand cmd: 
-                    ExecuteConsoleCommand(cmd);
-                    return;
-                    
-                    default: 
-                        throw new NotImplementedException(); 
-            }
-        }
 
-        public void ExecuteCommands(List<BaseCommand> commands)
-        {
-            try
-            {
-                foreach (var cmd in commands)
-                {
-                    DispatchCommand(cmd);
-                }
-            }
-            catch (Exception exc)
-            {
-                Console.WriteLine("Error while executing commands " + exc.ToString());
-            }
-            finally
-            {
-                _client.Disconnect();
-                _client.Dispose();
-            }
-        }
 
         public void Test()
         {
