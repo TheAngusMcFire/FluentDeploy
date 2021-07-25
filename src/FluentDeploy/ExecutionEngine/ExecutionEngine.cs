@@ -10,7 +10,7 @@ using Serilog;
 
 namespace FluentDeploy.ExecutionEngine
 {
-    public class ExecutionEngine
+    public class ExecutionEngine : ICommandExecutor
     {
         private readonly ILogger _logger;
         private readonly IHostCommandExecutor _commandExecutor;
@@ -25,18 +25,14 @@ namespace FluentDeploy.ExecutionEngine
             _logger = Log.ForContext<ExecutionEngine>();
         }
 
-        public void ExecuteHost() 
-            => ExecuteCommands(_host.Context.Commands);
-        
 
-        private void ExecuteCommands(IList<BaseCommand> commands)
+        public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
         {
-            foreach (var command in commands)
-            {
-                DispatchCommand(command);
-            }
+            DispatchCommand(cmd);
+            // todo get dispatched command result
+            return null;
         }
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -61,20 +57,20 @@ namespace FluentDeploy.ExecutionEngine
 
                     return true;
                 
-                //* **** basically a wrapper for multiple commands **** *\\
-                case ExecutionUnit cmd:
-                    _logger.Information($"Execute commands for: {cmd.Name}");
-                    ExecuteCommands(cmd.Commands);
-                    return true;
+                ////* **** basically a wrapper for multiple commands **** *\\
+                //case ExecutionUnit cmd:
+                //    _logger.Information($"Execute commands for: {cmd.Name}");
+                //    ExecuteCommands(cmd.Commands);
+                //    return true;
                 
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
                     return true;
                 
-                //* **** for commands which change their behavior based on what happens during execution **** *\\
-                case IBaseActiveCommandBuilder cmd:
-                    ExecuteCommands(cmd.GenerateCommands(_host.Context));
-                    return true;
+                ////* **** for commands which change their behavior based on what happens during execution **** *\\
+                //case IBaseActiveCommandBuilder cmd:
+                //    ExecuteCommands(cmd.GenerateCommands(_host.Context));
+                //    return true;
                 
                 default: 
                     throw new NotImplementedException(); 
@@ -103,5 +99,6 @@ namespace FluentDeploy.ExecutionEngine
                     throw new ArgumentOutOfRangeException();
             }
         }
+
     }
 }
