@@ -1,19 +1,24 @@
 using System.Collections.Generic;
 using FluentDeploy.Commands;
 using FluentDeploy.Commands.ExecutionControlCommands;
+using FluentDeploy.ExecutionEngine;
+using FluentDeploy.ExecutionEngine.Interfaces;
 
 namespace FluentDeploy.Execution
 {
-    public class HostContext : ICommandContext<HostContext>, ICommandContext
+    public class HostContext : ICommandContext
     {
-        public List<BaseCommand> Commands { get; } = new();
-        
-        public HostContext AddCommand(BaseCommand command)
+        private readonly ICommandExecutor _commandExecutor;
+
+        public HostContext(ICommandExecutor commandExecutor)
         {
-            Commands.Add(command);
-            return this;
+            _commandExecutor = commandExecutor;
         }
 
         public bool PackageManagerMirrorsUpdated { get; set; }
+        public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
+        {
+            return _commandExecutor.ExecuteCommand(cmd);
+        }
     }
 }

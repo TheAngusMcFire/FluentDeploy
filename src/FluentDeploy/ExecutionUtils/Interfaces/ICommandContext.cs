@@ -1,11 +1,8 @@
+using FluentDeploy.ExecutionEngine.Interfaces;
+
 namespace FluentDeploy.Execution
-{
-    public interface ICommandContext<T> : IHostInfo, ICommandAggregator<T>
-    {
-        
-    }
-    
-    public interface ICommandContext : IHostInfo, ICommandAggregator
+{   
+    public interface ICommandContext : IHostInfo, ICommandExecutor
     {
         
     }

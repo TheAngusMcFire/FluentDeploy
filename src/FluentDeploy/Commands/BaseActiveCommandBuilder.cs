@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using FluentDeploy.Execution;
+using FluentDeploy.ExecutionEngine.Interfaces;
 
 namespace FluentDeploy.Commands
 {
@@ -20,10 +21,9 @@ namespace FluentDeploy.Commands
             return (T) this;
         }
 
-        protected abstract List<BaseCommand> BuildCommands(IHostInfo hostInfo);
+        protected abstract void Execute(ICommandContext executor);
 
-        public void SaveTo(ICommandContext context) => 
-            context.AddCommand(this);
+        public void ExecuteOn(ICommandContext context) => Execute(context);
 
         public IList<BaseCommand> GenerateCommands(ICommandContext context)
         {

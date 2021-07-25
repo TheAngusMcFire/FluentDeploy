@@ -22,32 +22,32 @@ namespace FluentDeployExample
     {
         public static void TestPlayBook(HostContext context, HostConfig cfg)
         {
-            ExecutionUnit.WithName("Copy build artefacts")
-                .AddCommand(ConsoleCommand.Exec("cargo").WithArguments("build"))
-                .AddCommand(ConsoleCommand.Exec("cp").WithArguments("./loggir/target/debug/loggir", "loggir_exe"))
-                .SaveTo(context);
-
-            ExecutionUnit.WithName("Cleanup build artefacts")
-                .AddCommand(ConsoleCommand.Exec("rm").WithArguments("-rf",  "loggir_exe"))
-                .SaveTo(context);
-
-            context.AsRoot();
-
-            AptGet.Install("wireguard")
-                .RunAsRoot()
-                .SaveTo(context);
+            //ExecutionUnit.WithName("Copy build artefacts")
+            //    .AddCommand(ConsoleCommand.Exec("cargo").WithArguments("build"))
+            //    .AddCommand(ConsoleCommand.Exec("cp").WithArguments("./loggir/target/debug/loggir", "loggir_exe"))
+            //    .SaveTo(context);
+//
+            //ExecutionUnit.WithName("Cleanup build artefacts")
+            //    .AddCommand(ConsoleCommand.Exec("rm").WithArguments("-rf",  "loggir_exe"))
+            //    .SaveTo(context);
+//
+            //context.AsRoot();
+//
+            //AptGet.Install("wireguard")
+            //    .RunAsRoot()
+            //    .SaveTo(context);
         }
         
         
         public static void AptInstallPlayBook(HostContext context, HostConfig cfg)
         {
-            context.AsRoot();
-            
-            AptGet.Upgrade()
-                .SaveTo(context);
-            
-            AptGet.Install("vim")
-                .SaveTo(context);
+            //context.AsRoot();
+            //
+            //AptGet.Upgrade()
+            //    .SaveTo(context);
+            //
+            //AptGet.Install("vim")
+            //    .SaveTo(context);
         }
 
         static void Main(string[] args)

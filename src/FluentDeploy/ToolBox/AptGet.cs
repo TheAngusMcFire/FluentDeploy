@@ -29,21 +29,17 @@ namespace FluentDeploy.ToolBox
             return new () {_packages =  new List<string>(), Name = $"Upgrade Packages", _targetCommand = "upgrade"};
         }
         
-        protected override List<BaseCommand> BuildCommands(IHostInfo hostInfo)
+        protected override void Execute(ICommandContext context)
         {
-            var lst = new List<BaseCommand>();
-
-            if (!hostInfo.PackageManagerMirrorsUpdated)
+            if (!context.PackageManagerMirrorsUpdated)
             {
-                lst.Add(ConsoleCommand.Exec("apt-get")
+                context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
                     .WithArguments("update"));
-                lst.Add(CommandStore.PackageManagerUpdated());
+                context.PackageManagerMirrorsUpdated = true;
             }
 
-            lst.Add(ConsoleCommand.Exec("apt-get")
+            context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
                 .WithArguments(_targetCommand, "-y", PackageList(_packages)));
-
-            return lst;
         }
     }
 }
