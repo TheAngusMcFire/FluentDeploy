@@ -5,6 +5,6 @@ namespace FluentDeploy.ExecutionEngine.Interfaces
 {
     public interface IHostCommandExecutor
     {
-        CommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot);
+        ConsoleCommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot);
     }
 }

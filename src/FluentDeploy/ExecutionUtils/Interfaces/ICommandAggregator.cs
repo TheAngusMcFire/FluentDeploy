@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using FluentDeploy.Commands;
 
-namespace FluentDeploy.Execution
+namespace FluentDeploy.ExecutionUtils.Interfaces
 {
     public interface ICommandAggregator<T> : ICommandAggregator
     {

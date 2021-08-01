@@ -8,8 +8,8 @@ using FluentDeploy.Commands.Validation;
 using FluentDeploy.Components;
 using FluentDeploy.Components.Docker;
 using FluentDeploy.Config;
-using FluentDeploy.Execution;
 using FluentDeploy.ExecutionEngine;
+using FluentDeploy.ExecutionUtils;
 using FluentDeploy.Extentions;
 using FluentDeploy.HostLogic;
 using FluentDeploy.Logging;
@@ -41,13 +41,13 @@ namespace FluentDeployExample
         
         public static void AptInstallPlayBook(HostContext context, HostConfig cfg)
         {
-            //context.AsRoot();
-            //
-            //AptGet.Upgrade()
-            //    .SaveTo(context);
-            //
-            //AptGet.Install("vim")
-            //    .SaveTo(context);
+            context.AsRoot();
+            
+            AptGet.Upgrade()
+                .ExecuteOn(context);
+            
+            AptGet.Install("vim")
+                .ExecuteOn(context);
         }
 
         static void Main(string[] args)
@@ -55,13 +55,11 @@ namespace FluentDeployExample
             KeyStore.InitKeyStore();
             Logging.UseSerilogConsole(true);
             var config = ConfigLoader.Load("hosts.yaml");
-
             var hostConfig = config.GetUngroupedHostConfig("home_server");
             var host = new Host(hostConfig);
-            host.AddPlaybook(AptInstallPlayBook);
-            var remoteExecutor = new RemoteExecutor(host.Config.HostInfo);
-            var engine = new ExecutionEngine(host, remoteExecutor);
-            engine.ExecuteHost();
+            host.ExecutePlaybook(AptInstallPlayBook);
+
+            //engine.ExecuteHost();
 
             //var hosts = config.GetUngroupedHosts()
             //    .Select(x => new Host(x)

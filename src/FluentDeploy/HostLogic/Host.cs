@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using FluentDeploy.Config;
-using FluentDeploy.Execution;
+using FluentDeploy.ExecutionEngine;
+using FluentDeploy.ExecutionUtils;
 
 namespace FluentDeploy.HostLogic
 {
@@ -12,17 +13,19 @@ namespace FluentDeploy.HostLogic
 
         public Host(HostConfig config)
         {
-            Context = new HostContext();
+            var executor = new RemoteExecutor(config.HostInfo);
+            var engine = new ExecutionEngine.ExecutionEngine(this, executor);
+            Context = new HostContext(engine);
             Config = config;
         }
 
-        public Host AddPlaybook(Action<HostContext, HostConfig> playBook)
+        public Host ExecutePlaybook(Action<HostContext, HostConfig> playBook)
         {
             playBook(Context, Config);
             return this;
         }
         
-        public Host AddPlaybook(Action<HostContext> playBook)
+        public Host ExecutePlaybook(Action<HostContext> playBook)
         {
             playBook(Context);
             return this;

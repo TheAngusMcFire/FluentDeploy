@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using FluentDeploy.Execution;
+using FluentDeploy.ExecutionUtils;
+using FluentDeploy.ExecutionUtils.Interfaces;
 
 namespace FluentDeploy.Commands
 {
@@ -7,6 +8,6 @@ namespace FluentDeploy.Commands
     {
         ExecutionUnit BuildCommands(IHostInfo hostInfo);
 
-        void BuildCommands(ICommandContext commandContext);
+        void BuildCommands(IExecutionContext executionContext);
     }
 }

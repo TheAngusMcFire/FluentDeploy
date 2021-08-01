@@ -1,20 +1,20 @@
 using FluentDeploy.Commands;
-using FluentDeploy.Execution;
+using FluentDeploy.ExecutionEngine.Interfaces;
 
 namespace FluentDeploy.Extentions
 {
     public static class CommandAggregatorExtensions
     {
-        public static ICommandAggregator AsRoot(this ICommandAggregator aggregator)
+        public static ICommandExecutor AsRoot(this ICommandExecutor executor)
         {
-            aggregator.AddCommand(CommandStore.AsRootCommand());
-            return aggregator;
+            executor.ExecuteCommand(CommandStore.AsRootCommand());
+            return executor;
         }
         
-        public static ICommandAggregator AsUser(this ICommandAggregator aggregator)
+        public static ICommandExecutor AsUser(this ICommandExecutor executor)
         {
-            aggregator.AddCommand(CommandStore.AsUserCommand());
-            return aggregator;
+            executor.ExecuteCommand(CommandStore.AsUserCommand());
+            return executor;
         }
     }
 }

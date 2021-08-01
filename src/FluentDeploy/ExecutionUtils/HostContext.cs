@@ -1,12 +1,11 @@
-using System.Collections.Generic;
 using FluentDeploy.Commands;
-using FluentDeploy.Commands.ExecutionControlCommands;
 using FluentDeploy.ExecutionEngine;
 using FluentDeploy.ExecutionEngine.Interfaces;
+using FluentDeploy.ExecutionUtils.Interfaces;
 
-namespace FluentDeploy.Execution
+namespace FluentDeploy.ExecutionUtils
 {
-    public class HostContext : ICommandContext
+    public class HostContext : IExecutionContext
     {
         private readonly ICommandExecutor _commandExecutor;
 

@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Commands;
-using FluentDeploy.Execution;
+using FluentDeploy.ExecutionUtils.Interfaces;
 
 namespace FluentDeploy.ToolBox
 {
-    public class AptGet : BaseActiveCommandBuilder<AptGet>
+    public class AptGet : BaseCommandBuilder<AptGet>
     {
         private List<string> _packages;
 
         private string _targetCommand;
         
-        private static string PackageList(IEnumerable<string> lst) => lst.Count() != 0 ? lst.Aggregate((s, s1) => $"{s} {s1}") : string.Empty;
+        private static string PackageList(IEnumerable<string> lst) => lst.Count() != 0 ? lst.Aggregate((s, s1) => $"{s} {s1}") : null;
         
         public static AptGet Install(params string[] packages)
         {
@@ -29,17 +29,20 @@ namespace FluentDeploy.ToolBox
             return new () {_packages =  new List<string>(), Name = $"Upgrade Packages", _targetCommand = "upgrade"};
         }
         
-        protected override void Execute(ICommandContext context)
+        protected override void Execute(IExecutionContext context)
         {
             if (!context.PackageManagerMirrorsUpdated)
             {
                 context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
                     .WithArguments("update"));
-                context.PackageManagerMirrorsUpdated = true;
+                context.ExecuteCommand(CommandStore.PackageManagerUpdated());
             }
 
+            var packages = PackageList(_packages);
+            var args = packages == null ? new [] { _targetCommand, "-y"} : new [] {_targetCommand, "-y", packages};
+
             context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
-                .WithArguments(_targetCommand, "-y", PackageList(_packages)));
+                .WithArguments(args));
         }
     }
 }

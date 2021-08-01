@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentDeploy.Commands;
-using FluentDeploy.Execution;
+using FluentDeploy.ExecutionUtils;
+using FluentDeploy.ExecutionUtils.Interfaces;
 
 namespace FluentDeploy.Components.Docker
 {
@@ -72,7 +73,7 @@ namespace FluentDeploy.Components.Docker
             throw new NotImplementedException();
         }
 
-        public void BuildCommands(ICommandContext commandContext)
+        public void BuildCommands(IExecutionContext executionContext)
         {
             throw new NotImplementedException();
         }

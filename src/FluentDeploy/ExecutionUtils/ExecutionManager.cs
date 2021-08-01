@@ -1,4 +1,6 @@
-namespace FluentDeploy.Execution
+using FluentDeploy.ExecutionUtils.Interfaces;
+
+namespace FluentDeploy.ExecutionUtils
 {
     public class ExecutionManager
     {

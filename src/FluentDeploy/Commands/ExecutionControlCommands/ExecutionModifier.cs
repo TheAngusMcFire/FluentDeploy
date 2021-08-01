@@ -1,3 +1,5 @@
+using FluentDeploy.Commands.Validation;
+
 namespace FluentDeploy.Commands.ExecutionControlCommands
 {
     public enum ExecutionModifierType
@@ -11,5 +13,7 @@ namespace FluentDeploy.Commands.ExecutionControlCommands
     public class ExecutionModifier : BaseCommand
     {
         public ExecutionModifierType ModifierType { get; set; }
+        public override ICommandExecutionValidator Validator 
+            => new ConstResultCommandExecutionValidator(CommandExecutionValidationResult.SuccessResult);
     }
 }

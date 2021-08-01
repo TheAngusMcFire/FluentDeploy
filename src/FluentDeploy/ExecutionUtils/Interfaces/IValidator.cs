@@ -1,4 +1,4 @@
-namespace FluentDeploy.Execution
+namespace FluentDeploy.ExecutionUtils.Interfaces
 {
     public interface IValidator
     {

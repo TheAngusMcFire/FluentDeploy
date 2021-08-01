@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using FluentDeploy.Commands;
+using FluentDeploy.Commands.Validation;
+using FluentDeploy.ExecutionUtils.Interfaces;
 
-namespace FluentDeploy.Execution
+namespace FluentDeploy.ExecutionUtils
 {
     public class ExecutionUnit : BaseCommand, ICommandAggregator<ExecutionUnit>
     {
@@ -30,5 +32,7 @@ namespace FluentDeploy.Execution
         {
             return new () { Name = name };
         }
+
+        public override ICommandExecutionValidator Validator { get; }
     }
 }

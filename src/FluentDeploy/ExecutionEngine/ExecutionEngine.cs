@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using FluentDeploy.Commands;
 using FluentDeploy.Commands.ExecutionControlCommands;
-using FluentDeploy.Execution;
 using FluentDeploy.ExecutionEngine.Interfaces;
 using FluentDeploy.HostLogic;
 using Serilog;
@@ -25,7 +24,6 @@ namespace FluentDeploy.ExecutionEngine
             _logger = Log.ForContext<ExecutionEngine>();
         }
 
-
         public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
         {
             DispatchCommand(cmd);
@@ -39,23 +37,16 @@ namespace FluentDeploy.ExecutionEngine
         /// <param name="command"></param>
         /// <returns>whether execution should be continued</returns>
         /// <exception cref="NotImplementedException"></exception>
-        private bool DispatchCommand(BaseCommand command)
+        private CommandExecutionResult DispatchCommand(BaseCommand command)
         {
             switch (command)
             {
                 case ConsoleCommand cmd:
                     var result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
-
-                    _logger.Debug($"Stdout:  {result.StdoutText}");
-                    
-                    if (!result.Success)
-                    {
-                        // todo some error handling here
-                    }
-                    
-                    
-
-                    return true;
+                    var valResult = command.Validator.Validate(result);
+                    result.ValidationResult = valResult;
+                    _logger.Debug($"Stdout:  {result.StdOutText}");
+                    return result;
                 
                 ////* **** basically a wrapper for multiple commands **** *\\
                 //case ExecutionUnit cmd:
@@ -65,7 +56,7 @@ namespace FluentDeploy.ExecutionEngine
                 
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
-                    return true;
+                    return CommandExecutionResult.SuccessResult;
                 
                 ////* **** for commands which change their behavior based on what happens during execution **** *\\
                 //case IBaseActiveCommandBuilder cmd:
