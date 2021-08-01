@@ -1,4 +1,5 @@
 using FluentDeploy.ExecutionEngine;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
 
 namespace FluentDeploy.Commands.Validation
 {

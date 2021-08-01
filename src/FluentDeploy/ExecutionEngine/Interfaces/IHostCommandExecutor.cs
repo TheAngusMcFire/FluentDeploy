@@ -1,4 +1,5 @@
 using FluentDeploy.Commands;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
 using Serilog;
 
 namespace FluentDeploy.ExecutionEngine.Interfaces

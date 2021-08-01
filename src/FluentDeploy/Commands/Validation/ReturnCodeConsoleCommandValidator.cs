@@ -1,5 +1,6 @@
 using System;
 using FluentDeploy.ExecutionEngine;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
 
 namespace FluentDeploy.Commands.Validation
 {
@@ -24,7 +25,7 @@ namespace FluentDeploy.Commands.Validation
             var msg = success switch
             {
                 true => null,
-                false => $"Error expected return code: {res.ReturnCode} bot got: {_expectedReturnCode}"
+                false => $"Error expected return code: {_expectedReturnCode} bot got: {res.ReturnCode}"
             };
 
             return new CommandExecutionValidationResult()

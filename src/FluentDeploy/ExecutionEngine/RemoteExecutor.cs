@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Commands;
 using FluentDeploy.Config;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
 using Renci.SshNet;
 using Serilog;
@@ -40,9 +41,16 @@ namespace FluentDeploy.ExecutionEngine
             var cmdLine = $"{withRoot}{cmd.ExecutableName} {args}";
             _logger.Debug($"Execute Command: {cmdLine}");
             var sshCmd = _client.CreateCommand(cmdLine);
-            var txt = sshCmd.Execute();
+            sshCmd.CommandTimeout = TimeSpan.FromSeconds(cmd.Timeout);
+            var stdOut = sshCmd.Execute();
+            var stdErr = sshCmd.Error;
             var returnCode = sshCmd.ExitStatus;
-            return new ConsoleCommandExecutionResult() { StdOutText = txt, ReturnCode = returnCode };
+            return new ConsoleCommandExecutionResult()
+            {
+                ReturnCode = returnCode,
+                StdOutText = stdOut,
+                StdErrText = stdErr
+            };
         }
 
         private void ExecuteConsoleCommand(ConsoleCommand cmd)

@@ -41,12 +41,14 @@ namespace FluentDeployExample
         
         public static void AptInstallPlayBook(HostContext context, HostConfig cfg)
         {
-            context.AsRoot();
+            //context.AsRoot();
             
             AptGet.Upgrade()
+                .RunAsRoot()
                 .ExecuteOn(context);
             
             AptGet.Install("vim")
+                .RunAsRoot()
                 .ExecuteOn(context);
         }
 

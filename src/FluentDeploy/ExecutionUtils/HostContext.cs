@@ -1,5 +1,6 @@
 using FluentDeploy.Commands;
 using FluentDeploy.ExecutionEngine;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
 using FluentDeploy.ExecutionUtils.Interfaces;
 

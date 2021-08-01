@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using FluentDeploy.Commands;
 using FluentDeploy.Commands.ExecutionControlCommands;
+using FluentDeploy.Exceptions;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
 using FluentDeploy.HostLogic;
 using Serilog;
@@ -13,8 +13,8 @@ namespace FluentDeploy.ExecutionEngine
     {
         private readonly ILogger _logger;
         private readonly IHostCommandExecutor _commandExecutor;
-        private bool _currentRootPrivilegeModifier = false;
-        private bool _savedRootPrivilegeModifier = false;
+        private bool _currentRootPrivilegeModifier;
+        private bool _savedRootPrivilegeModifier;
         private readonly Host _host;
 
         public ExecutionEngine(Host host, IHostCommandExecutor commandExecutor)
@@ -26,46 +26,38 @@ namespace FluentDeploy.ExecutionEngine
 
         public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
         {
-            DispatchCommand(cmd);
-            // todo get dispatched command result
-            return null;
+            return DispatchCommand(cmd);;
         }
         
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns>whether execution should be continued</returns>
-        /// <exception cref="NotImplementedException"></exception>
         private CommandExecutionResult DispatchCommand(BaseCommand command)
         {
+            CommandExecutionResult result;
             switch (command)
             {
                 case ConsoleCommand cmd:
-                    var result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
-                    var valResult = command.Validator.Validate(result);
-                    result.ValidationResult = valResult;
-                    _logger.Debug($"Stdout:  {result.StdOutText}");
-                    return result;
-                
-                ////* **** basically a wrapper for multiple commands **** *\\
-                //case ExecutionUnit cmd:
-                //    _logger.Information($"Execute commands for: {cmd.Name}");
-                //    ExecuteCommands(cmd.Commands);
-                //    return true;
-                
+                    result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
+                    result.PrintResultData(_logger.Debug);
+                    break;
+
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
-                    return CommandExecutionResult.SuccessResult;
-                
-                ////* **** for commands which change their behavior based on what happens during execution **** *\\
-                //case IBaseActiveCommandBuilder cmd:
-                //    ExecuteCommands(cmd.GenerateCommands(_host.Context));
-                //    return true;
-                
+                    result = CommandExecutionResult.SuccessResult;
+                    break;
+
                 default: 
                     throw new NotImplementedException(); 
             }
+
+            var validationResult = command.Validator.Validate(result);
+            result.ValidationResult = validationResult;
+
+            if (validationResult.WasSuccessful)
+            {
+                return result;
+            }
+            
+            result.PrintResultData(_logger.Error);
+            throw new CommandValidationException(validationResult.ErrorMessage);
         }
 
         private void DispatchExecutionModifier(ExecutionModifier cmd)
@@ -81,7 +73,7 @@ namespace FluentDeploy.ExecutionEngine
                     _currentRootPrivilegeModifier = false;
                     break;
                 case ExecutionModifierType.ResetPrivilegeChange:
-                    _savedRootPrivilegeModifier = _currentRootPrivilegeModifier;
+                    _currentRootPrivilegeModifier = _savedRootPrivilegeModifier;
                     break;
                 case ExecutionModifierType.PackageManagerUpdated:
                     _host.Context.PackageManagerMirrorsUpdated = true;
