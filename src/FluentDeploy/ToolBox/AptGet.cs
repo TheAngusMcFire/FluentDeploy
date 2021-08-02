@@ -14,7 +14,11 @@ namespace FluentDeploy.ToolBox
 
         private string _targetCommand;
         
-        private static string PackageList(IEnumerable<string> lst) => lst.Count() != 0 ? lst.Aggregate((s, s1) => $"{s} {s1}") : null;
+        private static string PackageList(IEnumerable<string> lst)
+        {
+            var enumerable = lst as string[] ?? lst.ToArray();
+            return enumerable.Any() ? enumerable.Aggregate((s, s1) => $"{s} {s1}") : null;
+        }
 
         public static AptGet Install(params string[] packages)
         {
