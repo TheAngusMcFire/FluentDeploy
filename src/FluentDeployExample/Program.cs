@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using FluentDeploy;
 using FluentDeploy.Commands;
+using FluentDeploy.Commands.ExecutionControlCommands;
 using FluentDeploy.Commands.Validation;
 using FluentDeploy.Components;
 using FluentDeploy.Components.Docker;
 using FluentDeploy.Config;
+using FluentDeploy.Enums;
 using FluentDeploy.ExecutionEngine;
 using FluentDeploy.ExecutionUtils;
 using FluentDeploy.Extentions;
@@ -19,26 +21,7 @@ using YamlDotNet.Serialization;
 namespace FluentDeployExample
 {
     class Program
-    {
-        public static void TestPlayBook(HostContext context, HostConfig cfg)
-        {
-            //ExecutionUnit.WithName("Copy build artefacts")
-            //    .AddCommand(ConsoleCommand.Exec("cargo").WithArguments("build"))
-            //    .AddCommand(ConsoleCommand.Exec("cp").WithArguments("./loggir/target/debug/loggir", "loggir_exe"))
-            //    .SaveTo(context);
-//
-            //ExecutionUnit.WithName("Cleanup build artefacts")
-            //    .AddCommand(ConsoleCommand.Exec("rm").WithArguments("-rf",  "loggir_exe"))
-            //    .SaveTo(context);
-//
-            //context.AsRoot();
-//
-            //AptGet.Install("wireguard")
-            //    .RunAsRoot()
-            //    .SaveTo(context);
-        }
-        
-        
+    {   
         public static void AptInstallPlayBook(HostContext context, HostConfig cfg)
         {
             //context.AsRoot();
@@ -52,6 +35,15 @@ namespace FluentDeployExample
                 .ExecuteOn(context);
         }
 
+        private static void TestPlayBook(HostContext context, HostConfig cfg)
+        {
+            context.ExecuteCommand(new FileOperationCommand()
+            {
+                FileOperationType = FileOperationType.CreateDirectory,
+                Destination = "/home/angus/test"
+            });
+        }
+
         static void Main(string[] args)
         {
             KeyStore.InitKeyStore();
@@ -59,9 +51,9 @@ namespace FluentDeployExample
             var config = ConfigLoader.Load("hosts.yaml");
             var hostConfig = config.GetUngroupedHostConfig("home_server");
             var host = new Host(hostConfig);
-            host.ExecutePlaybook(AptInstallPlayBook);
 
-            //engine.ExecuteHost();
+            host.ExecutePlaybook(TestPlayBook);
+
 
             //var hosts = config.GetUngroupedHosts()
             //    .Select(x => new Host(x)

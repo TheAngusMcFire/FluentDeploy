@@ -1,6 +1,7 @@
 using System;
 using FluentDeploy.Commands;
 using FluentDeploy.Commands.ExecutionControlCommands;
+using FluentDeploy.Enums;
 using FluentDeploy.Exceptions;
 using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
@@ -32,13 +33,17 @@ namespace FluentDeploy.ExecutionEngine
         private CommandExecutionResult DispatchCommand(BaseCommand command)
         {
             CommandExecutionResult result;
+
             switch (command)
             {
                 case ConsoleCommand cmd:
                     result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
-                    result.PrintResultData(_logger.Debug);
                     break;
 
+                case FileOperationCommand {FileOperationType: FileOperationType.CreateDirectory} cmd:
+                    result = _commandExecutor.CreateDirectory(cmd, _currentRootPrivilegeModifier);
+                    break;
+                
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
                     result = CommandExecutionResult.SuccessResult;
@@ -48,6 +53,7 @@ namespace FluentDeploy.ExecutionEngine
                     throw new NotImplementedException(); 
             }
 
+            result.PrintResultData(_logger.Debug);
             var validationResult = command.Validator.Validate(result);
             result.ValidationResult = validationResult;
 

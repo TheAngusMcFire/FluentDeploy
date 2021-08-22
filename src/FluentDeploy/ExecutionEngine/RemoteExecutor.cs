@@ -12,26 +12,53 @@ namespace FluentDeploy.ExecutionEngine
 {
     public class RemoteExecutor : IHostCommandExecutor
     {
-        private SshClient _client;
-        private readonly ILogger _logger; 
+        private SshClient _sshClient;
+        private SftpClient _sftpClient;
+        private readonly ILogger _logger;
+        private readonly ConnectionInfo _connectionInfo;
+
+        private SshClient SshClient 
+        {
+            get
+            {
+                if (_sshClient == null)
+                {
+                    _sshClient = new SshClient(_connectionInfo);
+                    _sshClient.Connect();
+                }
+
+                return _sshClient;
+            }
+        }
         
-        public RemoteExecutor(HostInformation information)
+        private SftpClient SftpClient
+        {
+            get
+            {
+                if (_sftpClient == null)
+                {
+                    _sftpClient = new SftpClient(_connectionInfo);
+                    _sftpClient.Connect();
+                }
+
+                return _sftpClient;
+            }
+        }
+
+        public RemoteExecutor(string host, int port, string username, PrivateKeyFile[] privateKeys)
         {
             _logger = Log.ForContext<RemoteExecutor>();
-            var hostComps = information.Host.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
+            //var hostComps = information.Host.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
             
             // todo validate host info and report proper error \\
-            var host = hostComps.First();
-            var port = hostComps.Select((x, i) => (x, i))
-                .Where(x => x.i == 1)
-                .Select(x => Convert.ToInt32(x.x))
-                .DefaultIfEmpty(22)
-                .First();
+           
             
-            _logger.Debug($"Connect to host: {information.Host}");
+            //_logger.Debug($"Connect to host: {information.Host}");
             
-            _client = new SshClient(host, port, information.User, KeyStore.Default.PrivateKeyFiles);
-            _client.Connect();
+            _connectionInfo = new ConnectionInfo(host, port, username, new AuthenticationMethod[]
+            {
+                new PrivateKeyAuthenticationMethod(username, privateKeys)
+            });
         }
         
         public ConsoleCommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot)
@@ -40,7 +67,7 @@ namespace FluentDeploy.ExecutionEngine
             var withRoot = asRoot ? "sudo " : string.Empty;
             var cmdLine = $"{withRoot}{cmd.ExecutableName} {args}";
             _logger.Debug($"Execute Command: {cmdLine}");
-            var sshCmd = _client.CreateCommand(cmdLine);
+            var sshCmd = SshClient.CreateCommand(cmdLine);
             sshCmd.CommandTimeout = TimeSpan.FromSeconds(cmd.Timeout);
             var stdOut = sshCmd.Execute();
             var stdErr = sshCmd.Error;
@@ -51,6 +78,14 @@ namespace FluentDeploy.ExecutionEngine
                 StdOutText = stdOut,
                 StdErrText = stdErr
             };
+        }
+
+        public FileOperationExecutionResult CreateDirectory(FileOperationCommand command, bool asRoot)
+        {
+            var sftpClient = SftpClient;
+            
+            sftpClient.CreateDirectory(command.Destination);
+            return new FileOperationExecutionResult();
         }
 
         private void ExecuteConsoleCommand(ConsoleCommand cmd)
