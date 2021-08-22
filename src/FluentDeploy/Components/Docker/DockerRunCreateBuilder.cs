@@ -79,9 +79,9 @@ namespace FluentDeploy.Components.Docker
             return null;
         }
         
-        public void BuildCommands(ICommandAggregator commandAggregator)
-        {
-            //commandAggregator.AddCommands();
-        }
+        //public void BuildCommands(ICommandAggregator commandAggregator)
+        //{
+        //    //commandAggregator.AddCommands();
+        //}
     }
 }

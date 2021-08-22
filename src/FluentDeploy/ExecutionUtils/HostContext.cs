@@ -1,5 +1,5 @@
 using FluentDeploy.Commands;
-using FluentDeploy.ExecutionEngine;
+using FluentDeploy.DistributionVariants;
 using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
 using FluentDeploy.ExecutionUtils.Interfaces;
@@ -14,11 +14,15 @@ namespace FluentDeploy.ExecutionUtils
         {
             _commandExecutor = commandExecutor;
         }
-
-        public bool PackageManagerMirrorsUpdated { get; set; }
+        
         public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
         {
             return _commandExecutor.ExecuteCommand(cmd);
         }
+
+        public bool PackageManagerMirrorsUpdated { get; set; }
+        public int UserId { get; set; }
+        public int UserGroupId { get; set; }
+        public IDistributionVariant DistributionVariant { get; set; }
     }
 }

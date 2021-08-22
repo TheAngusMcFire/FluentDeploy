@@ -27,7 +27,7 @@ namespace FluentDeploy.ExecutionEngine
 
         public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
         {
-            return DispatchCommand(cmd);;
+            return DispatchCommand(cmd);
         }
         
         private CommandExecutionResult DispatchCommand(BaseCommand command)

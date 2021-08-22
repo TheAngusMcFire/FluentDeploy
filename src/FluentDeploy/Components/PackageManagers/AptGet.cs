@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Commands;
@@ -6,14 +5,14 @@ using FluentDeploy.Commands.Validation;
 using FluentDeploy.ExecutionUtils.Interfaces;
 using FluentDeploy.Extentions;
 
-namespace FluentDeploy.ToolBox
+namespace FluentDeploy.Components.PackageManagers
 {
     public class AptGet : BaseCommandBuilder<AptGet>
     {
         private List<string> _packages;
 
         private string _targetCommand;
-        
+
         private static string PackageList(IEnumerable<string> lst)
         {
             var enumerable = lst as string[] ?? lst.ToArray();
@@ -39,7 +38,7 @@ namespace FluentDeploy.ToolBox
         {
             return ArePackagesInstalled(context, packetName);
         }
-        
+
         private bool ArePackagesInstalled(IExecutionContext context, params string[] packetNames)
         {
             var argLst = new List<string>();

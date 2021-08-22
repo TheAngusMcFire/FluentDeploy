@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Commands;
-using FluentDeploy.Config;
 using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
 using Renci.SshNet;
@@ -21,7 +19,7 @@ namespace FluentDeploy.ExecutionEngine
         {
             get
             {
-                if (_sshClient == null)
+                if (_sshClient == null || _sshClient.IsConnected == false)
                 {
                     _sshClient = new SshClient(_connectionInfo);
                     _sshClient.Connect();
@@ -35,7 +33,7 @@ namespace FluentDeploy.ExecutionEngine
         {
             get
             {
-                if (_sftpClient == null)
+                if (_sftpClient == null || _sftpClient.IsConnected == false)
                 {
                     _sftpClient = new SftpClient(_connectionInfo);
                     _sftpClient.Connect();
@@ -48,13 +46,6 @@ namespace FluentDeploy.ExecutionEngine
         public RemoteExecutor(string host, int port, string username, PrivateKeyFile[] privateKeys)
         {
             _logger = Log.ForContext<RemoteExecutor>();
-            //var hostComps = information.Host.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
-            
-            // todo validate host info and report proper error \\
-           
-            
-            //_logger.Debug($"Connect to host: {information.Host}");
-            
             _connectionInfo = new ConnectionInfo(host, port, username, new AuthenticationMethod[]
             {
                 new PrivateKeyAuthenticationMethod(username, privateKeys)
@@ -80,67 +71,16 @@ namespace FluentDeploy.ExecutionEngine
             };
         }
 
-        public FileOperationExecutionResult CreateDirectory(FileOperationCommand command, bool asRoot)
+        public FileOperationExecutionResult CreateDirectory(FileOperationCommand command, bool asRoot /* rfu */)
         {
             var sftpClient = SftpClient;
-            
             sftpClient.CreateDirectory(command.Destination);
+            var attributes = sftpClient.GetAttributes(command.Destination);
+            attributes.UserId = command.UserId;
+            attributes.GroupId = command.GroupId;
+            attributes.SetPermissions(command.Permissions);
+            sftpClient.SetAttributes(command.Destination, attributes);
             return new FileOperationExecutionResult();
-        }
-
-        private void ExecuteConsoleCommand(ConsoleCommand cmd)
-        {
-            //var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x.Replace("\"", "\\\"")}'").ToArray());
-            //var withRoot = cmd.WithRoot ? "sudo " : string.Empty;
-            //var sshCmd = _client.CreateCommand($"{withRoot}{cmd.ExecutableName} {args}");
-            //var txt = sshCmd.Execute();
-            //var returnCode = sshCmd.ExitStatus;
-            //cmd.Validator.Validate(returnCode, sshCmd.OutputStream);
-        }
-
-
-        public void Test()
-        {
-            
-            //Renci.SshNet.
-
-            //var stream = client.CreateShellStream("term1", 100, 100, 100, 100, 100);
-            
-            /*
-            var inStream = new PipeStream();
-            var outStream = new PipeStream();
-            outStream.BlockLastReadBuffer = false;
-
-            //var reader = new StreamReader(outStream);
-            var writer = new StreamWriter(inStream);
-
-            var shell = client.CreateShell(inStream, outStream, Stream.Null);
-            shell.Start();
-            
-            
-            writer.WriteLine("ls /bin\n");
-            writer.Flush();
-            Task.Delay(100).Wait();
-            var buffer = new byte[500];
-            //var vals = outStream.Read(buffer, 0, buffer.Length);
-            outStream.BlockLastReadBuffer = false;
-            var reader = new StreamReader(outStream, Encoding.UTF8, true, 1, false);
-            //writer.Flush();
-            while (true)
-            {
-                Console.WriteLine(reader.ReadLine());
-            }
-                */
-            Console.ReadLine();
-
-            //for (var i = 0; i < 100; i++)
-            //{
-            //    var cmd = client.CreateCommand("read");
-            //    var txt = cmd.BeginExecute();
-            //    txt.AsyncWaitHandle.WaitOne();
-            //    var code = cmd.ExitStatus;
-            //    Console.WriteLine(txt);    
-            //}
         }
     }
 }
