@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using FluentDeploy.Commands;
+using FluentDeploy.Components.FileSystem;
 using FluentDeploy.Config;
 using FluentDeploy.DistributionVariants;
 using FluentDeploy.ExecutionEngine;
@@ -45,20 +46,16 @@ namespace FluentDeploy.HostLogic
             Context = CreateHostContext(engine, config.HostInfo.Distribution);
         }
 
-        private string ExecuteSimpleCommand(ICommandExecutor commandExecutor, string command, string[] args) => 
-            commandExecutor.ExecuteConsoleCommand(ConsoleCommand.Exec(command).WithArguments(args))
-            .StdOutText.Trim();
-        
         
         private HostContext CreateHostContext(ICommandExecutor commandExecutor, string configDistroName)
         {
             var distributionName = configDistroName ??=
-                ExecuteSimpleCommand(commandExecutor, "lsb_release", new[] {"-s", "-i"});
+                ExecutionUtils.ExecutionUtils.ExecuteSimpleCommand(commandExecutor, "lsb_release", new[] {"-s", "-i"});
 
             var distributionVariant = ResolveDistributionVariant(distributionName);
             
-            var userId = ExecuteSimpleCommand(commandExecutor, "id", new[] {"-u", Config.HostInfo.User}); 
-            var userGroupId = ExecuteSimpleCommand(commandExecutor, "id", new[] {"-g", Config.HostInfo.User});
+            var userId = commandExecutor.GetUserIdOfUser(Config.HostInfo.User); 
+            var userGroupId = commandExecutor.GetGroupIdOfUser(Config.HostInfo.User); 
 
            return new HostContext(commandExecutor)
            {

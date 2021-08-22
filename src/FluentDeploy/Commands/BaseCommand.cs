@@ -5,6 +5,7 @@ namespace FluentDeploy.Commands
 {
     public abstract class BaseCommand
     {
-        public abstract ICommandExecutionValidator Validator { get; } 
+        public virtual ICommandExecutionValidator Validator =>
+            new ConstResultCommandExecutionValidator(CommandExecutionValidationResult.SuccessResult);
     }
 }

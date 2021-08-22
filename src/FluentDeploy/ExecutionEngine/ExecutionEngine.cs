@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using FluentDeploy.Commands;
 using FluentDeploy.Commands.ExecutionControlCommands;
 using FluentDeploy.Enums;
@@ -36,6 +37,13 @@ namespace FluentDeploy.ExecutionEngine
 
             switch (command)
             {
+                case OutputTextSeparatorCommand cmd:
+                    _logger.Information($"// ************************ {cmd.CommandName} ************************ \\\\");
+                    _logger.Information($"Description: {cmd.UserDescription}");
+                    _logger.Information($"// -------------------------{new string(cmd.CommandName.Select(_ => '-').ToArray())}------------------------- \\\\\n");
+                    result = new CommandExecutionResult();
+                    break;
+                
                 case ConsoleCommand cmd:
                     result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
                     break;

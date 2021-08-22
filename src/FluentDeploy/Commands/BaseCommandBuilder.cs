@@ -1,5 +1,5 @@
-using System.Collections.Generic;
-using FluentDeploy.ExecutionEngine.Interfaces;
+using System;
+using FluentDeploy.Commands.ExecutionControlCommands;
 using FluentDeploy.ExecutionUtils.Interfaces;
 
 namespace FluentDeploy.Commands
@@ -7,12 +7,25 @@ namespace FluentDeploy.Commands
     public abstract class BaseCommandBuilder <T> where T : BaseCommandBuilder <T> 
     {
         private bool _runAsRoot;
-        protected string Name { get; set; }
-        protected string Description { get; set; }
+        protected string Name { get; set; } = typeof(T).Name;
+        protected string UserDescription { get; set; } = $"Execution of {typeof(T).Name}";
 
+        public T Description(string description)
+        {
+            UserDescription = description;
+            return (T) this;
+        }
+        
+        
         public T RunAsRoot()
         {
             _runAsRoot = true;
+            return (T) this;
+        }
+
+        public T FluentExec(Action action)
+        {
+            action();
             return (T) this;
         }
 
@@ -27,6 +40,15 @@ namespace FluentDeploy.Commands
 
         private void PreExecution(IExecutionContext context)
         {
+            if (Name != null || UserDescription != null)
+            {
+                context.ExecuteCommand(new OutputTextSeparatorCommand()
+                {
+                    CommandName = Name,
+                    UserDescription = UserDescription
+                });
+            }
+
             if(_runAsRoot)
             {
                 context.ExecuteCommand(CommandStore.AsRootCommand());

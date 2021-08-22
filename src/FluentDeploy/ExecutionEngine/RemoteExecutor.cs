@@ -74,12 +74,22 @@ namespace FluentDeploy.ExecutionEngine
         public FileOperationExecutionResult CreateDirectory(FileOperationCommand command, bool asRoot /* rfu */)
         {
             var sftpClient = SftpClient;
-            sftpClient.CreateDirectory(command.Destination);
-            var attributes = sftpClient.GetAttributes(command.Destination);
-            attributes.UserId = command.UserId;
-            attributes.GroupId = command.GroupId;
-            attributes.SetPermissions(command.Permissions);
-            sftpClient.SetAttributes(command.Destination, attributes);
+            
+            if(!sftpClient.Exists(command.Path))
+            {
+                sftpClient.CreateDirectory(command.Path);
+            }
+            
+            var attributes = sftpClient.GetAttributes(command.Path);
+            attributes.UserId = command.UserId ?? attributes.UserId;
+            attributes.GroupId = command.GroupId ?? attributes.GroupId;
+
+            if (command.Permissions.HasValue)
+            {
+                attributes.SetPermissions(command.Permissions.Value);    
+            }
+            
+            sftpClient.SetAttributes(command.Path, attributes);
             return new FileOperationExecutionResult();
         }
     }

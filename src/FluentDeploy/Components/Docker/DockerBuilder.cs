@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using FluentDeploy.Commands;
-using FluentDeploy.Components.Docker;
-
-namespace FluentDeploy.Components
+namespace FluentDeploy.Components.Docker
 {
     public class DockerBuilder
     {
