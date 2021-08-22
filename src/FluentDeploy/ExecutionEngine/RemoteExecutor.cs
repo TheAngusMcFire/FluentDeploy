@@ -16,8 +16,33 @@ namespace FluentDeploy.ExecutionEngine
         private readonly ILogger _logger;
         private readonly ConnectionInfo _connectionInfo;
 
-        private SshClient SshClient => _sshClient ??= new SshClient(_connectionInfo);
-        private SftpClient SftpClient => _sftpClient ??= new SftpClient(_connectionInfo);
+        private SshClient SshClient 
+        {
+            get
+            {
+                if (_sshClient == null)
+                {
+                    _sshClient = new SshClient(_connectionInfo);
+                    _sshClient.Connect();
+                }
+
+                return _sshClient;
+            }
+        }
+        
+        private SftpClient SftpClient
+        {
+            get
+            {
+                if (_sftpClient == null)
+                {
+                    _sftpClient = new SftpClient(_connectionInfo);
+                    _sftpClient.Connect();
+                }
+
+                return _sftpClient;
+            }
+        }
 
         public RemoteExecutor(string host, int port, string username, PrivateKeyFile[] privateKeys)
         {
@@ -25,12 +50,7 @@ namespace FluentDeploy.ExecutionEngine
             //var hostComps = information.Host.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
             
             // todo validate host info and report proper error \\
-            //var host = hostComps.First();
-            //var port = hostComps.Select((x, i) => (x, i))
-            //    .Where(x => x.i == 1)
-            //    .Select(x => Convert.ToInt32(x.x))
-            //    .DefaultIfEmpty(22)
-            //    .First();
+           
             
             //_logger.Debug($"Connect to host: {information.Host}");
             
@@ -46,7 +66,7 @@ namespace FluentDeploy.ExecutionEngine
             var withRoot = asRoot ? "sudo " : string.Empty;
             var cmdLine = $"{withRoot}{cmd.ExecutableName} {args}";
             _logger.Debug($"Execute Command: {cmdLine}");
-            var sshCmd = _sshClient.CreateCommand(cmdLine);
+            var sshCmd = SshClient.CreateCommand(cmdLine);
             var txt = sshCmd.Execute();
             var returnCode = sshCmd.ExitStatus;
             return new CommandExecutionResult() { Success = returnCode == 0, StdoutText = txt};
@@ -54,6 +74,8 @@ namespace FluentDeploy.ExecutionEngine
 
         public CommandExecutionResult CreateDirectory(string path, bool asRoot)
         {
+            var sftpClient = SftpClient;
+            //sftpClient.CreateDirectory();
             return null;
         }
 

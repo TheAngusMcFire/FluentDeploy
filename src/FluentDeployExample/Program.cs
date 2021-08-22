@@ -50,6 +50,11 @@ namespace FluentDeployExample
                 .SaveTo(context);
         }
 
+        public static void TestPlayBook(HostContext context)
+        {
+            //context.
+        }
+
         static void Main(string[] args)
         {
             KeyStore.InitKeyStore();
@@ -59,7 +64,17 @@ namespace FluentDeployExample
             var hostConfig = config.GetUngroupedHostConfig("home_server");
             var host = new Host(hostConfig);
             host.AddPlaybook(AptInstallPlayBook);
-            var remoteExecutor = new RemoteExecutor(host.Config.HostInfo);
+            
+            var hostComps = host.Config.HostInfo.Host.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
+            
+            var hostName = hostComps.First();
+            var port = hostComps.Select((x, i) => (x, i))
+                .Where(x => x.i == 1)
+                .Select(x => Convert.ToInt32(x.x))
+                .DefaultIfEmpty(22)
+                .First();
+
+            var remoteExecutor = new RemoteExecutor(hostName, port, host.Config.HostInfo.User, KeyStore.Default.PrivateKeyFiles);
             var engine = new ExecutionEngine(host, remoteExecutor);
             engine.ExecuteHost();
 
