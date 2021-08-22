@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using FluentDeploy.Commands;
 using FluentDeploy.ExecutionEngine.ExecutionResults;
@@ -56,7 +57,8 @@ namespace FluentDeploy.ExecutionEngine
         {
             var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x.Replace("\"", "\\\"")}'").ToArray());
             var withRoot = asRoot ? "sudo " : string.Empty;
-            var cmdLine = $"{withRoot}{cmd.ExecutableName} {args}";
+            var cmdLine = args.Length == 0 ? $"{withRoot}{cmd.ExecutableName}": $"{withRoot}{cmd.ExecutableName} {args}";
+            cmdLine = cmd.WorkingDir == null ? cmdLine : $"cd '{cmd.WorkingDir}' && {cmdLine} && cd";
             _logger.Debug($"Execute Command: {cmdLine}");
             var sshCmd = SshClient.CreateCommand(cmdLine);
             sshCmd.CommandTimeout = TimeSpan.FromSeconds(cmd.Timeout);
@@ -92,5 +94,26 @@ namespace FluentDeploy.ExecutionEngine
             sftpClient.SetAttributes(command.Path, attributes);
             return new FileOperationExecutionResult();
         }
+        
+        public FileOperationExecutionResult CreateFile(FileOperationCommand command, bool asRoot /* rfu */)
+        {
+            var sftpClient = SftpClient;
+            using var stream = sftpClient.Create(command.Path);
+            stream.Write(command.FileContent);
+            stream.Flush();
+            
+            var attributes = sftpClient.GetAttributes(command.Path);
+            attributes.UserId = command.UserId ?? attributes.UserId;
+            attributes.GroupId = command.GroupId ?? attributes.GroupId;
+
+            if (command.Permissions.HasValue)
+            {
+                attributes.SetPermissions(command.Permissions.Value);    
+            }
+            
+            sftpClient.SetAttributes(command.Path, attributes);
+            
+            return new FileOperationExecutionResult();
+        }  
     }
 }

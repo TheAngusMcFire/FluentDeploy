@@ -9,7 +9,7 @@ namespace FluentDeploy.Commands
         public string Path { get; set; }
         public string Source { get; set; }
         public string Destination { get; set; }
-        public string FileContent { get; set; }
+        public byte[] FileContent { get; set; }
         public int? UserId { get; set; }
         public int? GroupId { get; set; }
         public short? Permissions { get; set; }

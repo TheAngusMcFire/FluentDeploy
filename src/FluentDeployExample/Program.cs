@@ -1,4 +1,5 @@
-﻿using FluentDeploy.Commands;
+﻿using System;
+using FluentDeploy.Commands;
 using FluentDeploy.Components.FileSystem;
 using FluentDeploy.Components.PackageManagers;
 using FluentDeploy.Config;
@@ -33,8 +34,14 @@ namespace FluentDeployExample
                 .Description("Create Test directory")
                 .Owner(cfg.HostInfo.User)
                 .Group(cfg.HostInfo.User)
-                .Permissions(644)
+                .Permissions(744)
                 .ExecuteOn(context);
+            
+            FileSystem.File(context, "/test/test.txt")
+                .Content("#!/bin/python\nprint('Hello World')")
+                .CurrentUserAsOwnerAndGroup()
+                .Permissions(744)
+                .ExecuteOn(context); 
         }
 
         static void Main(string[] args)

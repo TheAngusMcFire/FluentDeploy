@@ -15,5 +15,8 @@ namespace FluentDeploy.Components.FileSystem
                 .Owner(owner)
                 .Group(group)
                 .Permissions(permissions);
+
+        public static FileStateBuilder File(IHostInfo info, string path) => 
+            new FileStateBuilder(info, path);
     }
 }

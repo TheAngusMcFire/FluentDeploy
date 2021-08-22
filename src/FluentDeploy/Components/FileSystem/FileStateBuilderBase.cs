@@ -4,7 +4,7 @@ using FluentDeploy.ExecutionUtils.Interfaces;
 
 namespace FluentDeploy.Components.FileSystem
 {
-    public abstract class FileStateBuilderBase : BaseCommandBuilder<DirectoryStateBuilder>
+    public abstract class FileStateBuilderBase<T> : BaseCommandBuilder<T> where T : BaseCommandBuilder<T>
     {
         protected string _user;
         protected string _group;
@@ -23,22 +23,22 @@ namespace FluentDeploy.Components.FileSystem
             };
         }
 
-        public DirectoryStateBuilder Owner(string userName) => 
+        public T Owner(string userName) => 
             FluentExec(() => _user = userName);
         
-        public DirectoryStateBuilder Group(string groupName) => 
+        public T Group(string groupName) => 
             FluentExec(() => _group = groupName);
         
-        public DirectoryStateBuilder Owner(int userId) => 
+        public T Owner(int userId) => 
             FluentExec(() => _fileOperationCommand.UserId  = userId);
         
-        public DirectoryStateBuilder Group(int groupId) => 
+        public T Group(int groupId) => 
             FluentExec(() =>_fileOperationCommand.GroupId = groupId);
         
-        public DirectoryStateBuilder CurrentUserAsOwnerAndGroup() => 
+        public T CurrentUserAsOwnerAndGroup() => 
             FluentExec(() => _currentUser = true);
         
-        public DirectoryStateBuilder Permissions(short permissions) => 
+        public T Permissions(short permissions) => 
             FluentExec(() => _permissions = permissions);
 
         protected void PrepareCommand(IExecutionContext executor)

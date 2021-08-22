@@ -8,5 +8,6 @@ namespace FluentDeploy.ExecutionEngine.Interfaces
     {
         ConsoleCommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot);
         FileOperationExecutionResult CreateDirectory(FileOperationCommand cmd, bool asRoot);
+        FileOperationExecutionResult CreateFile(FileOperationCommand cmd, bool asRoot);
     }
 }

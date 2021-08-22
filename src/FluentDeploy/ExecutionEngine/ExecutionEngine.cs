@@ -52,6 +52,10 @@ namespace FluentDeploy.ExecutionEngine
                     result = _commandExecutor.CreateDirectory(cmd, _currentRootPrivilegeModifier);
                     break;
                 
+                case FileOperationCommand {FileOperationType: FileOperationType.CreateFile} cmd:
+                    result = _commandExecutor.CreateFile(cmd, _currentRootPrivilegeModifier);
+                    break;
+                
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
                     result = CommandExecutionResult.SuccessResult;
