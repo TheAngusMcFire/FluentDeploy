@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentDeploy.Commands;
-using FluentDeploy.Execution;
+using FluentDeploy.ExecutionUtils;
+using FluentDeploy.ExecutionUtils.Interfaces;
 
 namespace FluentDeploy.Components.Docker
 {
-    public class DockerBuildPushTagImageBuilder : ICommandBuilder
+    public class DockerBuildPushTagImageBuilder
     {
         private string _dockerDir;
         private string _dockerFile;
@@ -67,12 +68,12 @@ namespace FluentDeploy.Components.Docker
             return this;
         }
 
-        public ExecutionUnit BuildCommands(IHostInfo hostInfo)
-        {
-            throw new NotImplementedException();
-        }
+        //public ExecutionUnit BuildCommands(IHostInfo hostInfo)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public void BuildCommands(ICommandContext commandContext)
+        public void BuildCommands(IExecutionContext executionContext)
         {
             throw new NotImplementedException();
         }

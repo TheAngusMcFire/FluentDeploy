@@ -1,19 +1,28 @@
-using System.Collections.Generic;
 using FluentDeploy.Commands;
-using FluentDeploy.Commands.ExecutionControlCommands;
+using FluentDeploy.DistributionVariants;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
+using FluentDeploy.ExecutionEngine.Interfaces;
+using FluentDeploy.ExecutionUtils.Interfaces;
 
-namespace FluentDeploy.Execution
+namespace FluentDeploy.ExecutionUtils
 {
-    public class HostContext : ICommandContext<HostContext>, ICommandContext
+    public class HostContext : IExecutionContext
     {
-        public List<BaseCommand> Commands { get; } = new();
-        
-        public HostContext AddCommand(BaseCommand command)
+        private readonly ICommandExecutor _commandExecutor;
+
+        public HostContext(ICommandExecutor commandExecutor)
         {
-            Commands.Add(command);
-            return this;
+            _commandExecutor = commandExecutor;
+        }
+        
+        public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
+        {
+            return _commandExecutor.ExecuteCommand(cmd);
         }
 
         public bool PackageManagerMirrorsUpdated { get; set; }
+        public int UserId { get; set; }
+        public int UserGroupId { get; set; }
+        public IDistributionVariant DistributionVariant { get; set; }
     }
 }

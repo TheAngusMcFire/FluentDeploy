@@ -1,21 +1,22 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Linq;
 using FluentDeploy.Commands;
 using FluentDeploy.Commands.ExecutionControlCommands;
-using FluentDeploy.Execution;
+using FluentDeploy.Enums;
+using FluentDeploy.Exceptions;
+using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
 using FluentDeploy.HostLogic;
 using Serilog;
 
 namespace FluentDeploy.ExecutionEngine
 {
-    public class ExecutionEngine
+    public class ExecutionEngine : ICommandExecutor
     {
         private readonly ILogger _logger;
         private readonly IHostCommandExecutor _commandExecutor;
-        private bool _currentRootPrivilegeModifier = false;
-        private bool _savedRootPrivilegeModifier = false;
+        private bool _currentRootPrivilegeModifier;
+        private bool _savedRootPrivilegeModifier;
         private readonly Host _host;
 
         public ExecutionEngine(Host host, IHostCommandExecutor commandExecutor)
@@ -25,60 +26,52 @@ namespace FluentDeploy.ExecutionEngine
             _logger = Log.ForContext<ExecutionEngine>();
         }
 
-        public void ExecuteHost() 
-            => ExecuteCommands(_host.Context.Commands);
-        
-
-        private void ExecuteCommands(IList<BaseCommand> commands)
+        public CommandExecutionResult ExecuteCommand(BaseCommand cmd)
         {
-            foreach (var command in commands)
-            {
-                DispatchCommand(command);
-            }
+            return DispatchCommand(cmd);
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns>whether execution should be continued</returns>
-        /// <exception cref="NotImplementedException"></exception>
-        private bool DispatchCommand(BaseCommand command)
+        
+        private CommandExecutionResult DispatchCommand(BaseCommand command)
         {
+            CommandExecutionResult result;
+
             switch (command)
             {
-                case ConsoleCommand cmd:
-                    var result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
-
-                    _logger.Debug($"Stdout:  {result.StdoutText}");
-                    
-                    if (!result.Success)
-                    {
-                        // todo some error handling here
-                    }
-                    
-                    
-
-                    return true;
+                case OutputTextSeparatorCommand cmd:
+                    _logger.Information($"// ************************ {cmd.CommandName} ************************ \\\\");
+                    _logger.Information($"Description: {cmd.UserDescription}");
+                    _logger.Information($"// -------------------------{new string(cmd.CommandName.Select(_ => '-').ToArray())}------------------------- \\\\\n");
+                    result = new CommandExecutionResult();
+                    break;
                 
-                //* **** basically a wrapper for multiple commands **** *\\
-                case ExecutionUnit cmd:
-                    _logger.Information($"Execute commands for: {cmd.Name}");
-                    ExecuteCommands(cmd.Commands);
-                    return true;
+                case ConsoleCommand cmd:
+                    result = _commandExecutor.ExecuteConsoleCommand(cmd, _currentRootPrivilegeModifier);
+                    break;
+
+                case FileOperationCommand {FileOperationType: FileOperationType.CreateDirectory} cmd:
+                    result = _commandExecutor.CreateDirectory(cmd, _currentRootPrivilegeModifier);
+                    break;
                 
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
-                    return true;
-                
-                //* **** for commands which change their behavior based on what happens during execution **** *\\
-                case IBaseActiveCommandBuilder cmd:
-                    ExecuteCommands(cmd.GenerateCommands(_host.Context));
-                    return true;
-                
+                    result = CommandExecutionResult.SuccessResult;
+                    break;
+
                 default: 
                     throw new NotImplementedException(); 
             }
+
+            result.PrintResultData(_logger.Debug);
+            var validationResult = command.Validator.Validate(result);
+            result.ValidationResult = validationResult;
+
+            if (validationResult.WasSuccessful)
+            {
+                return result;
+            }
+            
+            result.PrintResultData(_logger.Error);
+            throw new CommandValidationException(validationResult.ErrorMessage);
         }
 
         private void DispatchExecutionModifier(ExecutionModifier cmd)
@@ -94,7 +87,7 @@ namespace FluentDeploy.ExecutionEngine
                     _currentRootPrivilegeModifier = false;
                     break;
                 case ExecutionModifierType.ResetPrivilegeChange:
-                    _savedRootPrivilegeModifier = _currentRootPrivilegeModifier;
+                    _currentRootPrivilegeModifier = _savedRootPrivilegeModifier;
                     break;
                 case ExecutionModifierType.PackageManagerUpdated:
                     _host.Context.PackageManagerMirrorsUpdated = true;
@@ -103,5 +96,6 @@ namespace FluentDeploy.ExecutionEngine
                     throw new ArgumentOutOfRangeException();
             }
         }
+
     }
 }

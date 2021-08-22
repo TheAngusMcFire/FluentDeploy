@@ -1,6 +1,5 @@
 using System.IO;
 using FluentDeploy.Commands.Validation;
-using FluentDeploy.Execution;
 
 namespace FluentDeploy.Commands
 {
@@ -8,14 +7,17 @@ namespace FluentDeploy.Commands
     {
         public string ExecutableName { get; set; }
         public string[] Arguments { get; set; }
+        public int Timeout { get; set; } = 60;
+        public bool ReadAllOutput { get; set; }
         public Stream StandardInput { get; set; }
+        private ICommandExecutionValidator _validator = new ReturnCodeConsoleCommandValidator(0);
 
         public static ConsoleCommand Exec(string executableName) => new ()
             { ExecutableName = executableName };
 
         private ConsoleCommand()
         {
-            DefaultValidator();
+
         }
 
         public ConsoleCommand WithArguments(params string[] arguments)
@@ -24,10 +26,12 @@ namespace FluentDeploy.Commands
             return this;
         }
 
-        public ConsoleCommand DefaultValidator()
+        public ConsoleCommand WithValidator(ICommandExecutionValidator validator)
         {
-            //Validator = new ReturnCodeCommandValidator(0);
+            _validator = validator;
             return this;
         }
+
+        public override ICommandExecutionValidator Validator => _validator;
     }
 }

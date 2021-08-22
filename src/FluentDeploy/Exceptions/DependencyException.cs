@@ -2,7 +2,7 @@ namespace FluentDeploy.Exceptions
 {
     public class DependencyException : FluentDeployException
     {
-        public DependencyException(string? message) : base(message)
+        public DependencyException(string message) : base(message)
         {
         }
     }
