@@ -66,11 +66,14 @@ namespace FluentDeployExample
                 .ExecuteOn(context);
             
             Docker.Container("TestContainer", "debian:latest")
+                .Description("Add Test Docker Container")    
                 .AddNetwork("TestNetwork")
                 .AddMount("/tmp", "/app")
                 .AddPortMapping("22/tcp", "127.0.0.1", 22)
                 .AddPortMapping("23/tcp", "0.0.0.0", 23)
-                .Commands("echo", "Hello World")
+                .AddEnvironmentVar("TEST_VAR", "SuperTest")
+                .AddEnvironmentVar("TEST_VAR1", "SuperTest")
+                .Commands("sh", "-c", "echo $TEST_VAR")
                 .Restart()
                 .ExecuteOn(context);
 
