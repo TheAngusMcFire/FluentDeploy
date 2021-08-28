@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Net.Http;
 using FluentDeploy.Commands;
@@ -71,27 +72,26 @@ namespace FluentDeployExample
                 .AddMount("/tmp", "/app")
                 .AddPortMapping("22/tcp", "127.0.0.1", 22)
                 .AddPortMapping("23/tcp", "0.0.0.0", 23)
-                .AddEnvironmentVar("TEST_VAR", "SuperTest")
+                .AddEnvironmentVar("TEST_VAR", cfg.GetConfigString("test_message"))
                 .AddEnvironmentVar("TEST_VAR1", "SuperTest")
                 .Commands("sh", "-c", "echo $TEST_VAR")
                 .Restart()
                 .ExecuteOn(context);
-
-            var client = new CurlDockerHttpClient(context, true);
-            var api = new DockerApi(client);
-            var net = api.InspectContainer("TestContainer");
-            //var cre = api.CreateNetwork("TestNetwork");
-
-            //var containers = api.GetContainers(true);
-            //var fac = containers.First(x => x.Names.Contains("/factorio_main"));
-            //var des = api.InspectContainer(fac.Id);
         }
 
         static void Main(string[] args)
         {
+            
+            new EncryptedConfigFileHandler().Edit("/tmp/test.json", "Test1234");
+            
+            
+            return;
             KeyStore.InitKeyStore();
             Logging.UseSerilogConsole(true);
-            var config = ConfigLoader.Load("hosts.yaml");
+            var config = new ConfigLoader()
+                .AddCombinedFile("hosts.yaml")
+                .Build();
+
             var hostConfig = config.GetUngroupedHostConfig("home_server");
             var host = new Host(hostConfig);
 

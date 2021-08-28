@@ -19,6 +19,9 @@ SomeGroup:
 ---
 home_server:
   some_var: some value
+  test_message: "The config also works"
+  test_obj.lol: "this is a test"
+    
   
 SomeGroup:
   some_var: some other value
