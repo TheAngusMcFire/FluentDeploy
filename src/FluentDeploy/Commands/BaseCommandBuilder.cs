@@ -4,8 +4,9 @@ using FluentDeploy.ExecutionUtils.Interfaces;
 
 namespace FluentDeploy.Commands
 {
-    public abstract class BaseCommandBuilder <T> where T : BaseCommandBuilder <T> 
+    public abstract class BaseCommandBuilder <T> where T : BaseCommandBuilder <T>
     {
+        public bool SuppressOutput { get; set; } = false;
         private bool _runAsRoot;
         protected string Name { get; set; } = typeof(T).Name;
         protected string UserDescription { get; set; } = $"Execution of {typeof(T).Name}";
@@ -15,7 +16,6 @@ namespace FluentDeploy.Commands
             UserDescription = description;
             return (T) this;
         }
-        
         
         public T RunAsRoot()
         {
@@ -31,17 +31,21 @@ namespace FluentDeploy.Commands
 
         protected abstract void Execute(IExecutionContext executor);
 
-        public void ExecuteOn(IExecutionContext context)
+        public T ExecuteOn(IExecutionContext context)
         {
             PreExecution(context);
             Execute(context);
             PostExecution(context);
+            return (T) this;
         }
 
         private void PreExecution(IExecutionContext context)
         {
             if (Name != null || UserDescription != null)
             {
+                if(SuppressOutput)
+                    return;
+            
                 context.ExecuteCommand(new OutputTextSeparatorCommand()
                 {
                     CommandName = Name,

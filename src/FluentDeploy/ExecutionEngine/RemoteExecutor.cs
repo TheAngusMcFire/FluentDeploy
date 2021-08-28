@@ -55,7 +55,7 @@ namespace FluentDeploy.ExecutionEngine
         
         public ConsoleCommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot)
         {
-            var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x.Replace("\"", "\\\"")}'").ToArray());
+            var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x}'").ToArray());
             var withRoot = asRoot ? "sudo " : string.Empty;
             var cmdLine = args.Length == 0 ? $"{withRoot}{cmd.ExecutableName}": $"{withRoot}{cmd.ExecutableName} {args}";
             cmdLine = cmd.WorkingDir == null ? cmdLine : $"cd '{cmd.WorkingDir}' && {cmdLine} && cd";
@@ -67,6 +67,7 @@ namespace FluentDeploy.ExecutionEngine
             var returnCode = sshCmd.ExitStatus;
             return new ConsoleCommandExecutionResult()
             {
+                CommandLine = cmdLine,
                 ReturnCode = returnCode,
                 StdOutText = stdOut,
                 StdErrText = stdErr
