@@ -56,6 +56,11 @@ namespace FluentDeploy.Components.Docker.DockerApi
             return _client.Post<string>($"{DockerUrl}/containers/{nameOrId}/restart", new object(), 204).Result;
         }
         
+        public string PruneImages(bool dangling)
+        {
+            return _client.Post<string>($"{DockerUrl}/images/prune?dangling={dangling}", new object(), 200).Result;
+        }
+        
         public void DeleteContainer(string nameOrId)
         {
             _client.Delete($"{DockerUrl}/containers/{nameOrId}", 204);
