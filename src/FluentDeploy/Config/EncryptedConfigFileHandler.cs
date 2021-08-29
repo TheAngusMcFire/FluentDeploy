@@ -163,6 +163,19 @@ namespace FluentDeploy.Config
             return decLines.ToArray();
         }
 
+        public string GetDecryptedFileContent()
+        {
+            var builder = new StringBuilder();
+            var lines = DecryptLines(_file.Lines, _key, _nonce, _refTag);
+
+            foreach (var line in lines)
+            {
+                builder.AppendLine(line);
+            }
+            
+            return builder.ToString();
+        }
+
         public void Edit(string path, string passphrase)
         {
             var editor = Environment.GetEnvironmentVariable("EDITOR") 

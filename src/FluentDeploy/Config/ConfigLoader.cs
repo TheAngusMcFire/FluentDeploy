@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection.Metadata;
+using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -105,8 +106,18 @@ namespace FluentDeploy.Config
             return this;
         }
 
-        public ConfigLoader AddEncryptedVariablesFile(string path)
+        public ConfigLoader AddEncryptedVariablesFile(string path, string passphrase)
         {
+            var encHandler = new EncryptedConfigFileHandler();
+            encHandler.Load(path, passphrase);
+            var content = encHandler.GetDecryptedFileContent();
+            
+            var deserializer = new DeserializerBuilder().Build();
+            var parser = new Parser(new StringReader(content));
+            parser.Consume<StreamStart>();
+            parser.Accept<DocumentStart>(out var _);
+            var vars = deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
+            MergeVariables(vars);
             
             return this;
         }

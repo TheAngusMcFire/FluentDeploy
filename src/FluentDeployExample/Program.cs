@@ -2,6 +2,7 @@
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Net.Http;
+using FluentDeploy;
 using FluentDeploy.Commands;
 using FluentDeploy.Components.Curl;
 using FluentDeploy.Components.Docker;
@@ -81,15 +82,12 @@ namespace FluentDeployExample
 
         static void Main(string[] args)
         {
-            
-            new EncryptedConfigFileHandler().Edit("/tmp/test.json", "Test1234");
-            
-            
-            return;
             KeyStore.InitKeyStore();
             Logging.UseSerilogConsole(true);
+            BuiltinActions.ExecuteBuiltinActions(args);
             var config = new ConfigLoader()
                 .AddCombinedFile("hosts.yaml")
+                .AddEncryptedVariablesFile("secrets.json", args[0])
                 .Build();
 
             var hostConfig = config.GetUngroupedHostConfig("home_server");
