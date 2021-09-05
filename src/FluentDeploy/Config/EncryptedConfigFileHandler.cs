@@ -15,6 +15,7 @@ namespace FluentDeploy.Config
     public class EncryptedConfigFile
     {
         public string Salt { get; set; }
+        /* todo use on nonce per line and not a global one */
         public string Nonce { get; set; }
         public int Iterations { get; set; } 
         public string Tag { get; set; }
