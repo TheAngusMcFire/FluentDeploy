@@ -18,8 +18,8 @@ namespace FluentDeploy.Components.Docker
         private readonly List<string> _mounts = new();
         private readonly List<string> _env = new();
         private readonly ILogger _logger;
-        private List<string> _commands = null;
-        private List<string> _entrypoint = new List<string>();
+        private readonly List<string> _commands = null;
+        private readonly List<string> _entrypoint = new List<string>();
         private bool _started;
         private bool _restart;
         private bool _forcePullImage;
