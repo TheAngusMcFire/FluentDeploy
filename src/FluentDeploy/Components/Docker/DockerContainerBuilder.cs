@@ -18,8 +18,8 @@ namespace FluentDeploy.Components.Docker
         private readonly List<string> _mounts = new();
         private readonly List<string> _env = new();
         private readonly ILogger _logger;
-        private List<string> _commands = new();
-        private List<string> _entrypoint = new();
+        private List<string> _commands = null;
+        private List<string> _entrypoint = new List<string>();
         private bool _started;
         private bool _restart;
         private bool _forcePullImage;
@@ -69,7 +69,18 @@ namespace FluentDeploy.Components.Docker
 
         public DockerContainerBuilder Commands(params string[] cmds) => 
             FluentExec(() => _commands.AddRange(cmds));
-        
+
+        private bool CheckIfListsNeedUpdating(List<string> remote, List<string> local)
+        {
+            if (remote == null && local != null)
+                return true;
+
+            if (remote == null && local == null)
+                return false;
+
+            return remote.SequenceEqual(local);
+        }
+
         private bool CheckIfContainerNeedsUpdating(ContainerInspectResponse container, string imageId)
         {
             if (container.Image != imageId)
@@ -86,11 +97,11 @@ namespace FluentDeploy.Components.Docker
 
             if(!_env.All(x => container.Config.Env.Contains(x)))
                 return true;
-
-            if(!(container.Config.Cmd.SequenceEqual(_commands)))
+            
+            if(CheckIfListsNeedUpdating(container.Config.Cmd, _commands))
                 return true;
 
-            if(!(container.Config.Entrypoint.SequenceEqual(_entrypoint)))
+            if(!_entrypoint.All( x => container.Config.Entrypoint.Contains(x)))
                 return true;
 
             return false;
@@ -109,7 +120,7 @@ namespace FluentDeploy.Components.Docker
             {
                 Image = _image,
                 Cmd = _commands,
-                Entrypoint = _entrypoint,
+                Entrypoint = _entrypoint.Count == 0 ? null : _entrypoint,
                 Env = _env,
                 NetworkingConfig = new NetworkingConfig()
                 {

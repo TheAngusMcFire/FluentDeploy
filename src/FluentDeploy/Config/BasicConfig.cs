@@ -22,7 +22,7 @@ namespace FluentDeploy.Config
 
             foreach (var host in defaultHosts)
             {
-                var hostVars = GroupHostVars.GetValueOrDefault(host.Name);
+                var hostVars = GroupHostVars.GetValueOrDefault(groupName);
                 hosts.Add(new HostConfig(){HostInfo = host, ConfigValues = hostVars});
             }
 
