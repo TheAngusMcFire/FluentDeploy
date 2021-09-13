@@ -19,7 +19,8 @@ namespace FluentDeploy.Components.Docker
         private readonly List<string> _env = new();
         private readonly ILogger _logger;
         private readonly List<string> _commands = null;
-        private readonly List<string> _entrypoint = new List<string>();
+        private readonly List<string> _capabilities = new();
+        private readonly List<string> _entrypoint = new();
         private bool _started;
         private bool _restart;
         private bool _forcePullImage;
@@ -52,6 +53,9 @@ namespace FluentDeploy.Components.Docker
             return this;
         }
 
+        public DockerContainerBuilder AddCapability(string capabilityName) =>
+            FluentExec(() => _capabilities.Add(capabilityName));
+        
         public DockerContainerBuilder AddNetwork(string networkName) => 
             FluentExec(() => _networks.Add(networkName));
 
@@ -104,6 +108,9 @@ namespace FluentDeploy.Components.Docker
             if(!_entrypoint.All( x => container.Config.Entrypoint.Contains(x)))
                 return true;
 
+            if (CheckIfListsNeedUpdating(container.HostConfig.Capabilities, _capabilities))
+                return true;
+            
             return false;
         }
 
@@ -129,7 +136,8 @@ namespace FluentDeploy.Components.Docker
                 HostConfig = new HostConfig()
                 {
                     Binds = _mounts,
-                    PortBindings = _portMapping
+                    PortBindings = _portMapping,
+                    Capabilities = _capabilities.Count == 0 ? null : _capabilities
                 }
             };
 
