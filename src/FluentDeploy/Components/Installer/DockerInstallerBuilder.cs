@@ -25,6 +25,7 @@ namespace FluentDeploy.Components.Installer
                 //todo add file checks to see if we need to delete files
                 //todo build something to check for the newest version
                 //todo the key adding and the
+                //todo build something to get the release of debian
                 executor.ExecuteCommand(ConsoleCommand.Exec(
                     "rm -rf  /usr/share/keyrings/docker-archive-keyring.gpg && curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --batch --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg"));
                 
@@ -34,6 +35,7 @@ namespace FluentDeploy.Components.Installer
 
                 AptGet.Update()
                     .ExecuteOn(executor);
+
                 AptGet.Install("docker-ce", "docker-ce-cli", "containerd.io")
                     .ExecuteOn(executor);
 

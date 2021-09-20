@@ -97,6 +97,7 @@ namespace FluentDeploy.ExecutionEngine
         }
         
         //todo add file exists check
+        //todo add symbolic link creation
         
         public FileOperationExecutionResult CreateFile(FileOperationCommand command, bool asRoot /* rfu */)
         {
