@@ -8,6 +8,11 @@ UngroupedHosts:
     Host: 192.168.1.106:22
     User: angus
 
+  - Name: hetzner_testserver
+    Description: This is the main server
+    Host: 116.203.128.25:22
+    User: root
+
 SomeGroup:
   - Name: home_server1
     Description: This is the main server

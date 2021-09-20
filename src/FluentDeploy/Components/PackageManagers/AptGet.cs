@@ -28,7 +28,7 @@ namespace FluentDeploy.Components.PackageManagers
         {
             return new () {_packages =  new List<string>(), Name = $"Update mirror", _targetCommand = "update"};
         }
-
+        
         public static AptGet Upgrade()
         {
             return new () {_packages =  new List<string>(), Name = $"Upgrade Packages", _targetCommand = "upgrade"};
@@ -61,16 +61,18 @@ namespace FluentDeploy.Components.PackageManagers
                 context.ExecuteCommand(CommandStore.PackageManagerUpdated());
             }
 
-            var packages = PackageList(_packages);
-            var args = packages == null ? new[] {_targetCommand, "-y"} : new[] {_targetCommand, "-y", packages};
+            var argsLst = new List<string>();
+            argsLst.Add(_targetCommand);
+            argsLst.Add("-y");
+            argsLst.AddRange(_packages ?? new List<string>());
 
-            if (packages == null || ArePackagesInstalled(context, _packages.ToArray()))
+            if (_packages == null || ArePackagesInstalled(context, _packages.ToArray()))
             {
                 return;
             }
 
             context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
-                .WithArguments(args));
+                .WithArguments(argsLst.ToArray()));
         }
     }
 }

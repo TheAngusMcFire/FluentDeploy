@@ -96,6 +96,8 @@ namespace FluentDeploy.ExecutionEngine
             return new FileOperationExecutionResult();
         }
         
+        //todo add file exists check
+        
         public FileOperationExecutionResult CreateFile(FileOperationCommand command, bool asRoot /* rfu */)
         {
             var sftpClient = SftpClient;

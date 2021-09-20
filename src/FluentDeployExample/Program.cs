@@ -3,6 +3,7 @@ using FluentDeploy;
 using FluentDeploy.Components.Curl;
 using FluentDeploy.Components.Docker;
 using FluentDeploy.Components.FileSystem;
+using FluentDeploy.Components.Installer;
 using FluentDeploy.Components.PackageManagers;
 using FluentDeploy.Config;
 using FluentDeploy.ExecutionUtils;
@@ -74,20 +75,26 @@ namespace FluentDeployExample
                 .ExecuteOn(context);
         }
 
+        public static void InstallDockerTest(HostContext context, HostConfig cfg)
+        {
+            Installer.InstallDocker(true)
+                .ExecuteOn(context);
+        }
+
         static void Main(string[] args)
         {
             KeyStore.InitKeyStore();
             Logging.UseSerilogConsole(true);
-            BuiltinActions.ExecuteBuiltinActions(args);
+            //BuiltinActions.ExecuteBuiltinActions(args);
             var config = new ConfigLoader()
                 .AddCombinedFile("hosts.yaml")
-                .AddEncryptedVariablesFile("secrets.json", args[0])
+                //.AddEncryptedVariablesFile("secrets.json", args[0])
                 .Build();
 
-            var hostConfig = config.GetUngroupedHostConfig("home_server");
+            var hostConfig = config.GetUngroupedHostConfig("hetzner_testserver");
             var host = new Host(hostConfig);
 
-            host.ExecutePlaybook(DockerApiTestPlayBook);
+            host.ExecutePlaybook(InstallDockerTest);
             //host.ExecutePlaybook(AptInstallPlayBook);
             //host.ExecutePlaybook(TestPlayBook);
         }
