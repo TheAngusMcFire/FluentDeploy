@@ -1,16 +1,10 @@
-﻿using System;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
 using FluentDeploy;
-using FluentDeploy.Commands;
 using FluentDeploy.Components.Curl;
 using FluentDeploy.Components.Docker;
-using FluentDeploy.Components.Docker.DockerApi;
 using FluentDeploy.Components.FileSystem;
 using FluentDeploy.Components.PackageManagers;
 using FluentDeploy.Config;
-using FluentDeploy.Enums;
 using FluentDeploy.ExecutionUtils;
 using FluentDeploy.Extentions;
 using FluentDeploy.HostLogic;

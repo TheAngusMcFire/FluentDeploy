@@ -15,7 +15,6 @@ namespace FluentDeploy.Config
     public class EncryptedConfigFile
     {
         public string Salt { get; set; }
-        /* todo use on nonce per line and not a global one */
         public string Nonce { get; set; }
         public int Iterations { get; set; } 
         public string Tag { get; set; }
@@ -35,7 +34,7 @@ namespace FluentDeploy.Config
             using var rng = new RNGCryptoServiceProvider();
             
             var salt = new byte[KeySize];
-            _nonce = new byte[12];
+            _nonce = new byte[NonceSize];
             var iterationBytes = new byte[2];
             rng.GetNonZeroBytes(iterationBytes);
             rng.GetBytes(salt);
@@ -73,6 +72,7 @@ namespace FluentDeploy.Config
             _key = kdf.GetBytes(KeySize);
         }
 
+        private int NonceSize => 12;
         private int KeySize => 32;
         private int TagSize => 16;
         private int PaddingSize => 1024;
@@ -106,6 +106,8 @@ namespace FluentDeploy.Config
             foreach (var line in lines)
             {
                 rng.GetNonZeroBytes(padding);
+                var lineNonce = new byte[NonceSize];
+                rng.GetBytes(lineNonce);
                 var size = CalcPadding(line.Length);
                 var cipherText = new byte[size];
                 var payload = Encoding.Default.GetBytes(line);
@@ -117,8 +119,8 @@ namespace FluentDeploy.Config
                     plaintext[line.Length] = 0;
                 }
                 
-                aes.Encrypt(nonce, plaintext, cipherText, tag);
-                encLines.Add($"{Convert.ToBase64String(cipherText)};{Convert.ToBase64String(tag)}");
+                aes.Encrypt(lineNonce, plaintext, cipherText, tag);
+                encLines.Add($"{Convert.ToBase64String(lineNonce)};{Convert.ToBase64String(cipherText)};{Convert.ToBase64String(tag)}");
             }
             stream.Write(Encoding.Default.GetBytes(_file.Nonce));
             stream.Write(Encoding.Default.GetBytes(_file.Salt));
@@ -138,10 +140,11 @@ namespace FluentDeploy.Config
             foreach (var line in lines)
             {
                 var comps = line.Split(new[] {";"}, StringSplitOptions.RemoveEmptyEntries);
-                var cipherText = Convert.FromBase64String(comps[0]);
-                var refTag = Convert.FromBase64String(comps[1]);
+                var lineNonce = Convert.FromBase64String(comps[0]);
+                var cipherText = Convert.FromBase64String(comps[1]);
+                var refTag = Convert.FromBase64String(comps[2]);
                 var plainText = new byte[cipherText.Length];
-                aes.Decrypt(nonce, cipherText, refTag, plainText);
+                aes.Decrypt(lineNonce, cipherText, refTag, plainText);
                 var zeroIndex = Array.IndexOf(plainText, (byte)0);
                 var target = zeroIndex < 0 ? plainText : plainText.Take(zeroIndex).ToArray(); 
                 stream.Write(target);
