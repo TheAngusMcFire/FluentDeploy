@@ -20,10 +20,10 @@ namespace FluentDeploy.Components.FileSystem
         public FileStateBuilder(IHostInfo info, string path) : base(info, path, FileOperationType.CreateFile)
         { }
 
-        protected override void Execute(IExecutionContext executor)
+        protected override void Execute(IExecutionContext context)
         {
-            PrepareCommand(executor);
-            executor.ExecuteCommand(_fileOperationCommand);
+            PrepareCommand(context);
+            context.ExecuteCommand(_fileOperationCommand);
         }
     }
 }

@@ -23,6 +23,7 @@ namespace FluentDeploy.ExecutionUtils
         public bool PackageManagerMirrorsUpdated { get; set; }
         public int UserId { get; set; }
         public int UserGroupId { get; set; }
+        public string SystemTmpPath => "/tmp";
         public IDistributionVariant DistributionVariant { get; set; }
     }
 }

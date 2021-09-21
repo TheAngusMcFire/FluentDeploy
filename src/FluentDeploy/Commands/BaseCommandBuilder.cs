@@ -29,7 +29,7 @@ namespace FluentDeploy.Commands
             return (T) this;
         }
 
-        protected abstract void Execute(IExecutionContext executor);
+        protected abstract void Execute(IExecutionContext context);
 
         public T ExecuteOn(IExecutionContext context)
         {

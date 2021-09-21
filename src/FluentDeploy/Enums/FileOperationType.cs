@@ -4,6 +4,9 @@ namespace FluentDeploy.Enums
     {
         Unknown = 0,
         CreateDirectory = 1,
-        CreateFile = 2
+        CreateFile = 2,
+        Delete = 3,
+        Exists = 4,
+        SymbolicLink = 5
     }
 }

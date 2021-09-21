@@ -93,12 +93,9 @@ namespace FluentDeploy.ExecutionEngine
             }
             
             sftpClient.SetAttributes(command.Path, attributes);
-            return new FileOperationExecutionResult();
+            return new FileOperationExecutionResult(){Exists = true};;
         }
-        
-        //todo add file exists check
-        //todo add symbolic link creation
-        
+
         public FileOperationExecutionResult CreateFile(FileOperationCommand command, bool asRoot /* rfu */)
         {
             var sftpClient = SftpClient;
@@ -117,7 +114,28 @@ namespace FluentDeploy.ExecutionEngine
             
             sftpClient.SetAttributes(command.Path, attributes);
             
-            return new FileOperationExecutionResult();
-        }  
+            return new FileOperationExecutionResult() {Exists = true};
+        }
+
+        public FileOperationExecutionResult Delete(FileOperationCommand command, bool asRoot /* rfu */)
+        {
+            var sftpClient = SftpClient;
+            sftpClient.Delete(command.Path);
+            return new FileOperationExecutionResult() {Exists = false};
+        }
+        
+        public FileOperationExecutionResult Exists(FileOperationCommand command, bool asRoot /* rfu */)
+        {
+            var sftpClient = SftpClient;
+            var exists = sftpClient.Exists(command.Path);
+            return new FileOperationExecutionResult() {Exists = exists};
+        }
+
+        public FileOperationExecutionResult SymbolicLink(FileOperationCommand command, bool asRoot /* rfu */)
+        {
+            var sftpClient = SftpClient;
+            sftpClient.SymbolicLink(command.Source, command.Destination);
+            return new FileOperationExecutionResult() {Exists = true};
+        }
     }
 }

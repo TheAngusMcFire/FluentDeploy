@@ -31,7 +31,7 @@ namespace FluentDeploy.Components.Curl
         public CurlCommandBuilder WithBody(string body) => 
             FluentExec(() => _body = body);
 
-        protected override void Execute(IExecutionContext executor)
+        protected override void Execute(IExecutionContext context)
         {
             var args = new List<string> {"-X", _method.Method, "-w", "%{http_code}"};
 
@@ -58,7 +58,7 @@ namespace FluentDeploy.Components.Curl
             var cmd = ConsoleCommand.Exec("curl")
                 .WithArguments(args.ToArray()); 
             cmd.Timeout = Timeout;
-            var result = executor.ExecuteConsoleCommand(cmd);
+            var result = context.ExecuteConsoleCommand(cmd);
             var output = result.StdOutText;
             var lastLineIdx = output.LastIndexOf(Environment.NewLine, StringComparison.Ordinal);
             if (lastLineIdx == -1)

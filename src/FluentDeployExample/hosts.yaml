@@ -10,7 +10,7 @@ UngroupedHosts:
 
   - Name: hetzner_testserver
     Description: This is the main server
-    Host: 116.203.128.25:22
+    Host: 135.181.248.151:22
     User: root
 
 SomeGroup:

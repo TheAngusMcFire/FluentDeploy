@@ -36,9 +36,9 @@ namespace FluentDeploy.Components.Docker
         public DockerUtilsBuilder OnlyDanglingImages(bool dangling) =>
             FluentExec(() => _danglingImages = _danglingImages);
 
-        protected override void Execute(IExecutionContext executor)
+        protected override void Execute(IExecutionContext context)
         {
-            var api = new DockerApi.DockerApi(new CurlDockerHttpClient(executor) {Timeout = 600});
+            var api = new DockerApi.DockerApi(new CurlDockerHttpClient(context) {Timeout = 600});
 
             switch (_dockerOperation)
             {

@@ -12,6 +12,8 @@ namespace FluentDeploy.Components.PackageManagers
         private List<string> _packages;
 
         private string _targetCommand;
+        private bool _update;
+        private bool _upgrade;
 
         private static string PackageList(IEnumerable<string> lst)
         {
@@ -26,12 +28,12 @@ namespace FluentDeploy.Components.PackageManagers
 
         public static AptGet Update()
         {
-            return new () {_packages =  new List<string>(), Name = $"Update mirror", _targetCommand = "update"};
+            return new () {_packages =  new List<string>(), Name = $"Update mirror", _update = true, _upgrade = false};
         }
         
         public static AptGet Upgrade()
         {
-            return new () {_packages =  new List<string>(), Name = $"Upgrade Packages", _targetCommand = "upgrade"};
+            return new () {_packages =  new List<string>(), Name = $"Upgrade Packages", _update = true, _upgrade = true};
         }
 
         private bool IsPacketInstalled(IExecutionContext context, string packetName)
@@ -54,11 +56,17 @@ namespace FluentDeploy.Components.PackageManagers
 
         protected override void Execute(IExecutionContext context)
         {
-            if (!context.PackageManagerMirrorsUpdated)
+            if (!context.PackageManagerMirrorsUpdated || _update)
             {
                 context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
                     .WithArguments("update"));
                 context.ExecuteCommand(CommandStore.PackageManagerUpdated());
+            }
+
+            if (_upgrade)
+            {
+                context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
+                    .WithArguments("upgrade"));
             }
 
             var argsLst = new List<string>();
@@ -66,7 +74,7 @@ namespace FluentDeploy.Components.PackageManagers
             argsLst.Add("-y");
             argsLst.AddRange(_packages ?? new List<string>());
 
-            if (_packages == null || ArePackagesInstalled(context, _packages.ToArray()))
+            if (_packages == null || _packages.Count == 0 || ArePackagesInstalled(context, _packages.ToArray()))
             {
                 return;
             }

@@ -144,9 +144,9 @@ namespace FluentDeploy.Components.Docker
             var resp = api.CreateContainer(_name, config);
         }
 
-        protected override void Execute(IExecutionContext executor)
+        protected override void Execute(IExecutionContext context)
         {
-            var api = new DockerApi.DockerApi(new CurlDockerHttpClient(executor) {Timeout = 600});
+            var api = new DockerApi.DockerApi(new CurlDockerHttpClient(context) {Timeout = 600});
             
             var targetImage = api.InspectImage(_image); 
 

@@ -56,6 +56,18 @@ namespace FluentDeploy.ExecutionEngine
                     result = _commandExecutor.CreateFile(cmd, _currentRootPrivilegeModifier);
                     break;
                 
+                case FileOperationCommand {FileOperationType: FileOperationType.Delete} cmd:
+                    result = _commandExecutor.Delete(cmd, _currentRootPrivilegeModifier);
+                    break;
+                
+                case FileOperationCommand {FileOperationType: FileOperationType.Exists} cmd:
+                    result = _commandExecutor.Exists(cmd, _currentRootPrivilegeModifier);
+                    break;
+                
+                case FileOperationCommand {FileOperationType: FileOperationType.SymbolicLink} cmd:
+                    result = _commandExecutor.SymbolicLink(cmd, _currentRootPrivilegeModifier);
+                    break;
+                
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
                     result = CommandExecutionResult.SuccessResult;

@@ -14,9 +14,9 @@ namespace FluentDeploy.Components.Docker
             _name = name;
         }
 
-        protected override void Execute(IExecutionContext executor)
+        protected override void Execute(IExecutionContext context)
         {
-            var api = new DockerApi.DockerApi(new CurlDockerHttpClient(executor));
+            var api = new DockerApi.DockerApi(new CurlDockerHttpClient(context));
 
             if (api.GetNetworks().Any(x => x.Name == _name))
                 return;

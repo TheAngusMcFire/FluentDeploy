@@ -10,10 +10,10 @@ namespace FluentDeploy.Components.FileSystem
             
         }
 
-        protected override void Execute(IExecutionContext executor)
+        protected override void Execute(IExecutionContext context)
         {
-            PrepareCommand(executor);
-            executor.ExecuteCommand(_fileOperationCommand);
+            PrepareCommand(context);
+            context.ExecuteCommand(_fileOperationCommand);
         }
     }
 }
