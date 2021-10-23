@@ -1,5 +1,6 @@
 
 
+using System;
 using FluentDeploy.Commands;
 using FluentDeploy.Components.Etc;
 using FluentDeploy.Enums;
@@ -12,6 +13,15 @@ namespace FluentDeploy.Components.FileSystem
     {
         public static DirectoryStateBuilder Directory(IHostInfo info, string path) => 
             new DirectoryStateBuilder(info, path);
+
+        public static void Directories(IHostInfo info, Action<DirectoryStateBuilder> buildFunc, params string[] paths)
+        {
+            foreach (var path in paths)
+            {
+                var builder = new DirectoryStateBuilder(info, path);
+                buildFunc(builder);
+            }
+        }
 
         public static DirectoryStateBuilder Directory(IHostInfo info, string path, string owner, string group,
             short permissions) =>
