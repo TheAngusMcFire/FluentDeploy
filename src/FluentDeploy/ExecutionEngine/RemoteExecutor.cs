@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentDeploy.Commands;
@@ -74,15 +76,35 @@ namespace FluentDeploy.ExecutionEngine
             };
         }
 
+        private IEnumerable<string> GetPathsParts(string path)
+        {
+            var lst = new List<string>();
+            var dirInfo = new DirectoryInfo(path);
+
+            while (dirInfo is not null)
+            {
+                lst.Add(dirInfo.FullName);
+                dirInfo = dirInfo.Parent;
+            }
+
+            lst.Reverse();
+
+            return lst;
+        }
+
         public FileOperationExecutionResult CreateDirectory(FileOperationCommand command, bool asRoot /* rfu */)
         {
             var sftpClient = SftpClient;
-            
-            if(!sftpClient.Exists(command.Path))
+            var getParts = GetPathsParts(command.Path);
+
+            foreach (var path in getParts)
             {
-                sftpClient.CreateDirectory(command.Path);
+                if(!sftpClient.Exists(path))
+                {
+                    sftpClient.CreateDirectory(path);
+                }
             }
-            
+
             var attributes = sftpClient.GetAttributes(command.Path);
             attributes.UserId = command.UserId ?? attributes.UserId;
             attributes.GroupId = command.GroupId ?? attributes.GroupId;

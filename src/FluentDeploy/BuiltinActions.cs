@@ -18,11 +18,12 @@ namespace FluentDeploy
 
         private static void InitSecretsFile(string[] args)
         {
-            if(args.Length != 3)
-                ExitWithMessage("Error invalid number of Arguments: secrets-init <path> <passphrase>",-1);
+            if(args.Length != 2)
+                ExitWithMessage("Error invalid number of Arguments: secrets-init <path>",-1);
             
             var path = args[1];
-            var passphrase =  args[2];
+            Log.Information("passphrase:");
+            var passphrase = Console.ReadLine()?.Trim();
 
             if (passphrase.Length < 8)
                 ExitWithMessage("Error passphrase to short (min 8 characters)", -1);
@@ -32,11 +33,13 @@ namespace FluentDeploy
         
         private static void EditSecretsFile(string[] args)
         {
-            if(args.Length != 3)
-                ExitWithMessage("Error invalid number of Arguments: secrets-edit <path> <passphrase>",-1);
+            if(args.Length != 2)
+                ExitWithMessage("Error invalid number of Arguments: secrets-edit <path>",-1);
             
             var path = args[1];
-            var passphrase =  args[2];
+            
+            Log.Information("passphrase:");
+            var passphrase = Console.ReadLine()?.Trim();
             new EncryptedConfigFileHandler().Edit(path, passphrase);
         }
 
@@ -57,6 +60,10 @@ namespace FluentDeploy
                         break;
                     case "secrets-edit":
                         EditSecretsFile(args);
+                        break;
+                    
+                    case "help":
+                        ExitWithMessage("cmds: secrets-init or secrets-edit", 0);
                         break;
                     default: return;
                 }

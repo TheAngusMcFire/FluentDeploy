@@ -21,6 +21,7 @@ namespace FluentDeploy.Components.Docker
         private readonly List<string> _commands = null;
         private readonly List<string> _capabilities = new();
         private readonly List<string> _entrypoint = new();
+        private string _hostname;
         private bool _started;
         private bool _restart;
         private bool _forcePullImage;
@@ -39,6 +40,13 @@ namespace FluentDeploy.Components.Docker
             return this;
         }
         
+        /// <summary>
+        /// in the format: 443/tcp
+        /// </summary>
+        /// <param name="dockerPort"></param>
+        /// <param name="hostIp"></param>
+        /// <param name="hostPort"></param>
+        /// <returns></returns>
         public DockerContainerBuilder AddPortMapping(string dockerPort, string hostIp, int hostPort)
         {   
             if(!_portMapping.ContainsKey(dockerPort))
@@ -55,6 +63,9 @@ namespace FluentDeploy.Components.Docker
 
         public DockerContainerBuilder AddCapability(string capabilityName) =>
             FluentExec(() => _capabilities.Add(capabilityName));
+        
+        public DockerContainerBuilder Hostname(string hostname) => 
+            FluentExec(() => _hostname = hostname);
         
         public DockerContainerBuilder AddNetwork(string networkName) => 
             FluentExec(() => _networks.Add(networkName));
@@ -74,14 +85,20 @@ namespace FluentDeploy.Components.Docker
         public DockerContainerBuilder Commands(params string[] cmds) => 
             FluentExec(() => _commands.AddRange(cmds));
 
-        private bool CheckIfListsNeedUpdating(List<string> remote, List<string> local)
+        private bool CheckIfListsNeedUpdating(List<string> remote, List<string> local, bool capabilities)
         {
             if (remote == null && local != null)
                 return true;
 
             if (remote == null && local == null)
                 return false;
+            
+            if (remote != null && local == null && !capabilities)
+                return false;
 
+            if (remote != null && local == null && capabilities)
+                return true;
+            
             return remote.SequenceEqual(local);
         }
 
@@ -102,13 +119,13 @@ namespace FluentDeploy.Components.Docker
             if(!_env.All(x => container.Config.Env.Contains(x)))
                 return true;
             
-            if(CheckIfListsNeedUpdating(container.Config.Cmd, _commands))
+            if(CheckIfListsNeedUpdating(container.Config.Cmd, _commands, false))
                 return true;
 
             if(!_entrypoint.All( x => container.Config.Entrypoint.Contains(x)))
                 return true;
 
-            if (CheckIfListsNeedUpdating(container.HostConfig.Capabilities, _capabilities))
+            if (CheckIfListsNeedUpdating(container.HostConfig.Capabilities, _capabilities, true))
                 return true;
             
             return false;
@@ -125,6 +142,7 @@ namespace FluentDeploy.Components.Docker
         
             var config = new ContainerConfig()
             {
+                Hostname = _hostname,
                 Image = _image,
                 Cmd = _commands,
                 Entrypoint = _entrypoint.Count == 0 ? null : _entrypoint,

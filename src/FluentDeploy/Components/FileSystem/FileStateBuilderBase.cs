@@ -8,6 +8,8 @@ namespace FluentDeploy.Components.FileSystem
     {
         protected string _user;
         protected string _group;
+        protected int _userId;
+        protected int _groupId;
         protected bool _currentUser;
         protected short? _permissions;
         protected readonly FileOperationCommand _fileOperationCommand;

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -84,6 +85,10 @@ namespace FluentDeploy.Components.Installer
                             .SymbolicLink(dockerCodePath, dockerComposeSymLinkDest, context);
                     }
                 }
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
         }
     }

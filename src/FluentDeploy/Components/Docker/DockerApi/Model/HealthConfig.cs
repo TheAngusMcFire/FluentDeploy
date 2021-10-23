@@ -48,8 +48,8 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         ///     Start period for the container to initialize before starting health-retries countdown in
         ///     nanoseconds. It should be 0 or at least 1000000 (1 ms). 0 means inherit. .
         /// </param>
-        public HealthConfig(List<string> test = default, int interval = default, int timeout = default,
-            int retries = default, int startPeriod = default)
+        public HealthConfig(List<string> test = default, long interval = default, long timeout = default,
+            long retries = default, long startPeriod = default)
         {
             Test = test;
             Interval = interval;
@@ -76,7 +76,7 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         /// </summary>
         /// <value>The time to wait between checks in nanoseconds. It should be 0 or at least 1000000 (1 ms). 0 means inherit. </value>
         [DataMember(Name = "Interval", EmitDefaultValue = false)]
-        public int Interval { get; set; }
+        public long Interval { get; set; }
 
         /// <summary>
         ///     The time to wait before considering the check to have hung. It should be 0 or at least 1000000 (1 ms). 0 means
@@ -87,14 +87,14 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         ///     inherit.
         /// </value>
         [DataMember(Name = "Timeout", EmitDefaultValue = false)]
-        public int Timeout { get; set; }
+        public long Timeout { get; set; }
 
         /// <summary>
         ///     The number of consecutive failures needed to consider a container as unhealthy. 0 means inherit.
         /// </summary>
         /// <value>The number of consecutive failures needed to consider a container as unhealthy. 0 means inherit. </value>
         [DataMember(Name = "Retries", EmitDefaultValue = false)]
-        public int Retries { get; set; }
+        public long Retries { get; set; }
 
         /// <summary>
         ///     Start period for the container to initialize before starting health-retries countdown in nanoseconds. It should be
@@ -105,7 +105,7 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         ///     be 0 or at least 1000000 (1 ms). 0 means inherit.
         /// </value>
         [DataMember(Name = "StartPeriod", EmitDefaultValue = false)]
-        public int StartPeriod { get; set; }
+        public long StartPeriod { get; set; }
 
         /// <summary>
         ///     Returns true if HealthConfig instances are equal
