@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using FluentDeploy.Commands;
 using FluentDeploy.ExecutionEngine.ExecutionResults;
 using FluentDeploy.ExecutionEngine.Interfaces;
@@ -54,7 +55,16 @@ namespace FluentDeploy.ExecutionEngine
                 new PrivateKeyAuthenticationMethod(username, privateKeys)
             });
         }
-        
+
+        public (string host, int port, IDisposable handle) EstablishPortForwarding(string localInterface, string remoteInterface, int port)
+        {
+            var sshClient = SshClient;
+            var portForwarding = new ForwardedPortLocal(localInterface, 22345, remoteInterface, (uint)port);
+            sshClient.AddForwardedPort(portForwarding);
+            portForwarding.Start();
+            return (portForwarding.BoundHost, (int)portForwarding.BoundPort, portForwarding);
+        }
+
         public ConsoleCommandExecutionResult ExecuteConsoleCommand(ConsoleCommand cmd, bool asRoot)
         {
             var args = string.Join(" ", cmd.Arguments.Select(x => $"'{x}'").ToArray());
@@ -105,16 +115,7 @@ namespace FluentDeploy.ExecutionEngine
                 }
             }
 
-            var attributes = sftpClient.GetAttributes(command.Path);
-            attributes.UserId = command.UserId ?? attributes.UserId;
-            attributes.GroupId = command.GroupId ?? attributes.GroupId;
-
-            if (command.Permissions.HasValue)
-            {
-                attributes.SetPermissions(command.Permissions.Value);    
-            }
-            
-            sftpClient.SetAttributes(command.Path, attributes);
+            SetAttributes(command);
             return new FileOperationExecutionResult(){Exists = true};;
         }
 
@@ -125,16 +126,7 @@ namespace FluentDeploy.ExecutionEngine
             stream.Write(command.FileContent);
             stream.Flush();
             
-            var attributes = sftpClient.GetAttributes(command.Path);
-            attributes.UserId = command.UserId ?? attributes.UserId;
-            attributes.GroupId = command.GroupId ?? attributes.GroupId;
-
-            if (command.Permissions.HasValue)
-            {
-                attributes.SetPermissions(command.Permissions.Value);    
-            }
-            
-            sftpClient.SetAttributes(command.Path, attributes);
+            SetAttributes(command);
             
             return new FileOperationExecutionResult() {Exists = true};
         }
@@ -168,6 +160,20 @@ namespace FluentDeploy.ExecutionEngine
             file.CopyTo(stream);
             stream.Flush();
             
+            SetAttributes(command);
+            
+            return new FileOperationExecutionResult() {Exists = true};
+        }
+
+        public FileOperationExecutionResult SetFileAttributes(FileOperationCommand command, bool asRoot)
+        {
+            SetAttributes(command);
+            return new FileOperationExecutionResult() {Exists = true};
+        }
+        
+        private void SetAttributes(FileOperationCommand command)
+        {
+            var sftpClient = SftpClient;
             var attributes = sftpClient.GetAttributes(command.Path);
             attributes.UserId = command.UserId ?? attributes.UserId;
             attributes.GroupId = command.GroupId ?? attributes.GroupId;
@@ -178,8 +184,6 @@ namespace FluentDeploy.ExecutionEngine
             }
             
             sftpClient.SetAttributes(command.Path, attributes);
-            
-            return new FileOperationExecutionResult() {Exists = true};
         }
     }
 }

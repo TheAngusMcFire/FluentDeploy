@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Renci.SshNet;
 
 namespace FluentDeploy.Config
 {
     public class KeyStore
     {
-        public PrivateKeyFile[] PrivateKeyFiles;
+        public List<PrivateKeyFile> PrivateKeyFiles;
         public static KeyStore Default { get; private set; }
 
         public static void InitKeyStore(string keyPath = null)
@@ -28,12 +29,12 @@ namespace FluentDeploy.Config
                 }
             }
             
-            Default = new KeyStore() { PrivateKeyFiles = keyFiles.ToArray() };
+            Default = new KeyStore() { PrivateKeyFiles = keyFiles.ToList() };
         }
 
         public static void AddAdditionsPrivateKey(string key)
         {
-            
+            Default.PrivateKeyFiles.Add(new PrivateKeyFile(key));
         }
     }
 }

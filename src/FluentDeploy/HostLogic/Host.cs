@@ -16,6 +16,7 @@ namespace FluentDeploy.HostLogic
     {
         public HostConfig Config { get; }
         public HostContext Context { get; }
+        public RemoteExecutor Executor { get; set; }
         private readonly ILogger _logger;
 
         private IDistributionVariant ResolveDistributionVariant(string distributionName)
@@ -28,9 +29,8 @@ namespace FluentDeploy.HostLogic
             };
         }
 
-        public Host(HostConfig config)
+        private (string, int) GetConnectionParameters(HostConfig config)
         {
-            _logger = Log.ForContext<Host>();
             var hostComps = config.HostInfo.Host.Split(new[] {":"}, StringSplitOptions.RemoveEmptyEntries);
             
             var hostName = hostComps.First();
@@ -39,14 +39,33 @@ namespace FluentDeploy.HostLogic
                 .Select(x => Convert.ToInt32(x.x))
                 .DefaultIfEmpty(22)
                 .First();
+
+            return (hostName, port);
+        }
+
+        public Host(HostConfig config)
+        {
+            _logger = Log.ForContext<Host>();
+
+            var (hostName, port) = GetConnectionParameters(config);
             
-            var executor = new RemoteExecutor(hostName, port, config.HostInfo.User, KeyStore.Default.PrivateKeyFiles);
-            var engine = new ExecutionEngine.ExecutionEngine(this, executor);
+            Executor = new RemoteExecutor(hostName, port, config.HostInfo.User, KeyStore.Default.PrivateKeyFiles.ToArray());
+            var engine = new ExecutionEngine.ExecutionEngine(this, Executor);
             Config = config;
             Context = CreateHostContext(engine, config.HostInfo.Distribution);
         }
 
-        
+        public Host AsJumpHost(HostConfig config)
+        {
+            var conParms = config.HostInfo.Host;
+            var (hostName, port) = GetConnectionParameters(config);
+            var (boundHost, boundPort, handle) = Executor.EstablishPortForwarding("127.0.0.1", hostName, port);
+            config.HostInfo.Host = $"{boundHost}:{boundPort}";
+            var newHost = new Host(config);
+            config.HostInfo.Host = conParms;
+            return newHost;
+        }
+
         private HostContext CreateHostContext(ICommandExecutor commandExecutor, string configDistroName)
         {
             var distributionName = configDistroName ??=
@@ -57,7 +76,7 @@ namespace FluentDeploy.HostLogic
             var userId = commandExecutor.GetUserIdOfUser(Config.HostInfo.User); 
             var userGroupId = commandExecutor.GetGroupIdOfUser(Config.HostInfo.User); 
 
-           return new HostContext(commandExecutor)
+           return new HostContext(this, commandExecutor)
            {
                UserName = Config.HostInfo.User,
                PackageManagerMirrorsUpdated = false,

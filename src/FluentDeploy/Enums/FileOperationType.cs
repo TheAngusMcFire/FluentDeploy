@@ -9,5 +9,6 @@ namespace FluentDeploy.Enums
         Exists = 4,
         SymbolicLink = 5,
         CopyFromLocal = 6,
+        SetAttributes = 7,
     }
 }

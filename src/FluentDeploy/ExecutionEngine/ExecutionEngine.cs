@@ -72,6 +72,10 @@ namespace FluentDeploy.ExecutionEngine
                     result = _commandExecutor.CopyLocalFile(cmd, _currentRootPrivilegeModifier);
                     break;
                 
+                case FileOperationCommand {FileOperationType: FileOperationType.SetAttributes} cmd:
+                    result = _commandExecutor.SetFileAttributes(cmd, _currentRootPrivilegeModifier);
+                    break;
+                
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
                     result = CommandExecutionResult.SuccessResult;

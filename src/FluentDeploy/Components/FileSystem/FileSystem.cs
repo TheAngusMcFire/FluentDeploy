@@ -50,5 +50,8 @@ namespace FluentDeploy.Components.FileSystem
 
         public static CopyFromLocalBuilder CopyFromLocal(string source, string destination, IExecutionContext context) =>
             new CopyFromLocalBuilder(context, source, destination);
+        
+        public static SetAttributesBuilder SetAttributes(string target, IExecutionContext context) =>
+            new SetAttributesBuilder(context, target);
     }
 }
