@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using FluentDeploy.Components.Docker.DockerApi.Model;
 
 namespace FluentDeploy.Components.Docker.DockerApi
@@ -10,6 +11,11 @@ namespace FluentDeploy.Components.Docker.DockerApi
         private const string DockerVersion = "v1.40";
         private readonly IDockerHttpClient _client;
         private string DockerUrl = $"{DockerBaseUrl}/{DockerVersion}";
+
+        protected class CreateDockerResponse
+        {
+            public string Id { get; set; }
+        }
 
         public DockerApi(IDockerHttpClient client)
         {
@@ -33,7 +39,8 @@ namespace FluentDeploy.Components.Docker.DockerApi
 
         public string CreateContainer(string name, ContainerConfig config)
         {
-            return _client.Post<string>($"{DockerUrl}/containers/create?name={name}", config, 201).Result;
+            var resp = _client.Post<string>($"{DockerUrl}/containers/create?name={name}", config, 201).Result;
+            return JsonSerializer.Deserialize<CreateDockerResponse>(resp)?.Id;
         }
 
         public string RenameContainer(string nameOrId, string name)
@@ -75,6 +82,12 @@ namespace FluentDeploy.Components.Docker.DockerApi
         {
             var req = new InlineObject2(name, true);
             return _client.Post<NetworkCreateResponse>($"{DockerUrl}/networks/create", req, 201).Result;
+        }
+        
+        public string ConnectToNetwork(string containerId, string networkId)
+        {
+            var req = new InlineObject3(containerId);
+            return _client.Post<string>($"{DockerUrl}/networks/{networkId}/connect", req, 200).Result;
         }
 
         public string PullImage(string image)

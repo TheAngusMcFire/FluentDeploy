@@ -20,6 +20,7 @@ namespace FluentDeploy.ExecutionUtils
             return _commandExecutor.ExecuteCommand(cmd);
         }
 
+        public string UserName { get; set; }
         public bool PackageManagerMirrorsUpdated { get; set; }
         public int UserId { get; set; }
         public int UserGroupId { get; set; }

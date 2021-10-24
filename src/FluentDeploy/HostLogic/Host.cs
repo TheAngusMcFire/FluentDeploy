@@ -59,6 +59,7 @@ namespace FluentDeploy.HostLogic
 
            return new HostContext(commandExecutor)
            {
+               UserName = Config.HostInfo.User,
                PackageManagerMirrorsUpdated = false,
                UserId = Convert.ToInt32(userId),
                UserGroupId = Convert.ToInt32(userGroupId),

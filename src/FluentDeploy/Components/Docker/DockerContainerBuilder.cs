@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using FluentDeploy.Commands;
 using FluentDeploy.Components.Docker.DockerApi;
 using FluentDeploy.Components.Docker.DockerApi.Model;
+using FluentDeploy.Exceptions;
 using FluentDeploy.ExecutionUtils.Interfaces;
 using Serilog;
 
@@ -135,10 +137,15 @@ namespace FluentDeploy.Components.Docker
         {
             var endpoints = new Dictionary<string, EndpointSettings>();
             var networks = api.GetNetworks();
-            _networks.ForEach(x => endpoints.Add(x, new EndpointSettings()
+
+            if (_networks.Count != 0)
             {
-                NetworkID = networks.First(y => y.Name == x).Id
-            }));
+                var nw = _networks.First();
+                endpoints.Add(nw, new EndpointSettings()
+                {
+                    NetworkID = networks.First(y => y.Name == nw).Id
+                });
+            }
         
             var config = new ContainerConfig()
             {
@@ -159,7 +166,22 @@ namespace FluentDeploy.Components.Docker
                 }
             };
 
-            var resp = api.CreateContainer(_name, config);
+            var newId = api.CreateContainer(_name, config);
+
+            if (_networks.Count > 1)
+            {
+                foreach (var x in _networks.Skip(1))
+                {
+                    var nwi = networks.FirstOrDefault(y => y.Name == x);
+
+                    if (nwi is null)
+                    {
+                        throw new FluentDeployException($"Network {x}  not found");
+                    }
+
+                    api.ConnectToNetwork(newId, nwi.Id);
+                }
+            }
         }
 
         protected override void Execute(IExecutionContext context)
@@ -171,7 +193,12 @@ namespace FluentDeploy.Components.Docker
             if (targetImage == null || _forcePullImage)
             {
                 _logger.Debug(api.PullImage(_image));
-                targetImage = api.InspectImage(_image); 
+                targetImage = api.InspectImage(_image);
+
+                if (targetImage is null)
+                {
+                    throw new FluentDeployException($"Image {_image} does not exist");
+                }
             }
             
             var container = api.InspectContainer(_name);

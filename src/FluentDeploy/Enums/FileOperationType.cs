@@ -7,6 +7,7 @@ namespace FluentDeploy.Enums
         CreateFile = 2,
         Delete = 3,
         Exists = 4,
-        SymbolicLink = 5
+        SymbolicLink = 5,
+        CopyFromLocal = 6,
     }
 }

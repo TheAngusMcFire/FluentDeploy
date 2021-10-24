@@ -68,6 +68,10 @@ namespace FluentDeploy.ExecutionEngine
                     result = _commandExecutor.SymbolicLink(cmd, _currentRootPrivilegeModifier);
                     break;
                 
+                case FileOperationCommand {FileOperationType: FileOperationType.CopyFromLocal} cmd:
+                    result = _commandExecutor.CopyLocalFile(cmd, _currentRootPrivilegeModifier);
+                    break;
+                
                 case ExecutionModifier cmd:
                     DispatchExecutionModifier(cmd);
                     result = CommandExecutionResult.SuccessResult;

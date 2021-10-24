@@ -12,5 +12,6 @@ namespace FluentDeploy.ExecutionEngine.Interfaces
         FileOperationExecutionResult Delete(FileOperationCommand command, bool asRoot);
         FileOperationExecutionResult Exists(FileOperationCommand command, bool asRoot);
         FileOperationExecutionResult SymbolicLink(FileOperationCommand command, bool asRoot);
+        FileOperationExecutionResult CopyLocalFile(FileOperationCommand command, bool asRoot);
     }
 }

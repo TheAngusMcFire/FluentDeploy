@@ -159,5 +159,27 @@ namespace FluentDeploy.ExecutionEngine
             sftpClient.SymbolicLink(command.Source, command.Destination);
             return new FileOperationExecutionResult() {Exists = true};
         }
+        
+        public FileOperationExecutionResult CopyLocalFile(FileOperationCommand command, bool asRoot /* rfu */)
+        {
+            var sftpClient = SftpClient;
+            using var stream = sftpClient.Create(command.Path);
+            var file = File.Open(command.Source, FileMode.Open);
+            file.CopyTo(stream);
+            stream.Flush();
+            
+            var attributes = sftpClient.GetAttributes(command.Path);
+            attributes.UserId = command.UserId ?? attributes.UserId;
+            attributes.GroupId = command.GroupId ?? attributes.GroupId;
+
+            if (command.Permissions.HasValue)
+            {
+                attributes.SetPermissions(command.Permissions.Value);    
+            }
+            
+            sftpClient.SetAttributes(command.Path, attributes);
+            
+            return new FileOperationExecutionResult() {Exists = true};
+        }
     }
 }

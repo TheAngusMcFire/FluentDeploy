@@ -30,5 +30,10 @@ namespace FluentDeploy.Config
             
             Default = new KeyStore() { PrivateKeyFiles = keyFiles.ToArray() };
         }
+
+        public static void AddAdditionsPrivateKey(string key)
+        {
+            
+        }
     }
 }

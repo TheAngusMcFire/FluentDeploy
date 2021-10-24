@@ -6,6 +6,7 @@ namespace FluentDeploy.ExecutionUtils.Interfaces
     {
         bool PackageManagerMirrorsUpdated { get; }
         int UserId { get;  }
+        string UserName { get; }
         int UserGroupId { get;  }
         string SystemTmpPath { get; }
         IDistributionVariant DistributionVariant { get;  }

@@ -47,5 +47,8 @@ namespace FluentDeploy.Components.FileSystem
         public static void SymbolicLink(string source, string destination, IExecutionContext context) => 
             context.ExecuteCommand(new FileOperationCommand() 
                 {FileOperationType = FileOperationType.SymbolicLink, Source = source, Destination = destination});
+
+        public static CopyFromLocalBuilder CopyFromLocal(string source, string destination, IExecutionContext context) =>
+            new CopyFromLocalBuilder(context, source, destination);
     }
 }

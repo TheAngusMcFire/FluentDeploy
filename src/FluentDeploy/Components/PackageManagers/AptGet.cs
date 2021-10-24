@@ -14,6 +14,7 @@ namespace FluentDeploy.Components.PackageManagers
         private string _targetCommand;
         private bool _update;
         private bool _upgrade;
+        private bool _noRecommends = false;
 
         private static string PackageList(IEnumerable<string> lst)
         {
@@ -40,6 +41,8 @@ namespace FluentDeploy.Components.PackageManagers
         {
             return ArePackagesInstalled(context, packetName);
         }
+
+        public AptGet NoRecommends() => FluentExec(() => _noRecommends = true);
 
         private bool ArePackagesInstalled(IExecutionContext context, params string[] packetNames)
         {
@@ -71,6 +74,12 @@ namespace FluentDeploy.Components.PackageManagers
 
             var argsLst = new List<string>();
             argsLst.Add(_targetCommand);
+
+            if (_noRecommends)
+            {
+                argsLst.Add("--no-install-recommends");
+            }
+            
             argsLst.Add("-y");
             argsLst.AddRange(_packages ?? new List<string>());
 
