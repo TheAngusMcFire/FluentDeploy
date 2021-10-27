@@ -12,7 +12,7 @@ using Serilog;
 
 namespace FluentDeploy.HostLogic
 {
-    public class Host
+    public class Host : IDisposable
     {
         public HostConfig Config { get; }
         public HostContext Context { get; }
@@ -55,15 +55,25 @@ namespace FluentDeploy.HostLogic
             Context = CreateHostContext(engine, config.HostInfo.Distribution);
         }
 
+        private IDisposable JumpHostHandle;
         public Host AsJumpHost(HostConfig config)
         {
             var conParms = config.HostInfo.Host;
             var (hostName, port) = GetConnectionParameters(config);
             var (boundHost, boundPort, handle) = Executor.EstablishPortForwarding("127.0.0.1", hostName, port);
             config.HostInfo.Host = $"{boundHost}:{boundPort}";
-            var newHost = new Host(config);
+            var newHost = new Host(config)
+            {
+                JumpHostHandle = handle
+            };
             config.HostInfo.Host = conParms;
             return newHost;
+        }
+        
+        public void Dispose()
+        {
+            Executor?.Dispose();
+            JumpHostHandle?.Dispose();
         }
 
         private HostContext CreateHostContext(ICommandExecutor commandExecutor, string configDistroName)
@@ -97,5 +107,7 @@ namespace FluentDeploy.HostLogic
             playBook(Context);
             return this;
         }
+
+
     }
 }

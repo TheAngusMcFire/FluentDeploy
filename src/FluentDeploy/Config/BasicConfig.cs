@@ -1,32 +1,53 @@
 using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Consts;
+using Microsoft.Extensions.Configuration;
 
 namespace FluentDeploy.Config
 {
     public class BasicConfig
     {
-        public Dictionary<string, List<HostInformation>> GroupHosts { get; set; }
-        public Dictionary<string, Dictionary<string, string>> GroupHostVars { get; set; }
+        private readonly Dictionary<string, Dictionary<string, IConfigurationRoot>> _groupHostConfig;
+        private readonly Dictionary<string, IConfigurationRoot> _hostConfig;
 
-        public List<HostConfig> GetUngroupedHostConfigs() 
-            => GetHostConfigsFromGroup(StringConstants.UngroupedHostsGroupName);
-
-        public HostConfig GetUngroupedHostConfig(string hostName) =>
-            GetUngroupedHostConfigs().First(x => x.HostInfo.Name == hostName);
-
-        public List<HostConfig> GetHostConfigsFromGroup(string groupName)
+        public BasicConfig(Dictionary<string, Dictionary<string, IConfigurationRoot>> groupHostConfig, Dictionary<string, IConfigurationRoot> hostConfig)
         {
-            var hosts = new List<HostConfig>();
-            var defaultHosts = GroupHosts.GetValueOrDefault(groupName, new List<HostInformation>());
+            _groupHostConfig = groupHostConfig;
+            _hostConfig = hostConfig;
+        }
 
-            foreach (var host in defaultHosts)
+        public HostConfig GetHostConfig(string hostName)
+        {
+            var hostInfo = new HostInformation();
+            _hostConfig[hostName].Bind(hostInfo);
+            var sshConfigs = new Dictionary<string, SshConfig>();
+            _hostConfig[hostName].GetSection("SshKeyConfigs").Bind(sshConfigs);
+
+            return new HostConfig()
             {
-                var hostVars = GroupHostVars.GetValueOrDefault(groupName);
-                hosts.Add(new HostConfig(){HostInfo = host, ConfigValues = hostVars});
-            }
+                HostInfo = hostInfo,
+                Config = _hostConfig[hostName],
+                SshConfigs = sshConfigs
+            };
+        }
 
-            return hosts;
+        public List<HostConfig> GetGroupHostConfigs(string groupName)
+        {
+            return _groupHostConfig[groupName].Select(x =>
+            {
+                var hostInfo = new HostInformation();
+                var sshConfigs = new Dictionary<string, SshConfig>();
+                x.Value.GetSection("SshKeyConfigs").Bind(sshConfigs);
+                x.Value.Bind(hostInfo);
+                
+                
+                return new HostConfig()
+                {
+                    HostInfo = hostInfo,
+                    Config = x.Value,
+                    SshConfigs = sshConfigs
+                };
+            }).ToList();
         }
     }
 }

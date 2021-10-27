@@ -5,8 +5,9 @@ namespace FluentDeploy.Config
         public string Name { get; set; }
         public string Description { get; set; }
         public string Host { get; set; }
-        public int Port { get; set; }
         public string User { get; set; }
         public string Distribution { get; set; }
+        
+        public string JumpHost { get; set; }
     }
 }

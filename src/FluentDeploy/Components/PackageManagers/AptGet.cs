@@ -62,14 +62,16 @@ namespace FluentDeploy.Components.PackageManagers
             if (!context.PackageManagerMirrorsUpdated || _update)
             {
                 context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
-                    .WithArguments("update"));
+                    .WithArguments("-y","update")
+                    .WithTimeout(600));
                 context.ExecuteCommand(CommandStore.PackageManagerUpdated());
             }
 
             if (_upgrade)
             {
                 context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
-                    .WithArguments("upgrade"));
+                    .WithArguments("-y","upgrade")
+                    .WithTimeout(600));
             }
 
             var argsLst = new List<string>();
@@ -89,6 +91,7 @@ namespace FluentDeploy.Components.PackageManagers
             }
 
             context.ExecuteCommand(ConsoleCommand.Exec("apt-get")
+                .WithTimeout(600)
                 .WithArguments(argsLst.ToArray()));
         }
     }

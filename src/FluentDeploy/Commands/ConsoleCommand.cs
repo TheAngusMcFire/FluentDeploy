@@ -34,6 +34,12 @@ namespace FluentDeploy.Commands
             Arguments = arguments;
             return this;
         }
+        
+        public ConsoleCommand WithTimeout(int timeout)
+        {
+            Timeout = timeout;
+            return this;
+        }
 
         public ConsoleCommand WithValidator(ICommandExecutionValidator validator)
         {

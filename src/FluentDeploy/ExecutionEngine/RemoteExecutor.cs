@@ -12,7 +12,7 @@ using Serilog;
 
 namespace FluentDeploy.ExecutionEngine
 {
-    public class RemoteExecutor : IHostCommandExecutor
+    public class RemoteExecutor : IHostCommandExecutor, IDisposable
     {
         private SshClient _sshClient;
         private SftpClient _sftpClient;
@@ -184,6 +184,12 @@ namespace FluentDeploy.ExecutionEngine
             }
             
             sftpClient.SetAttributes(command.Path, attributes);
+        }
+
+        public void Dispose()
+        {
+            _sshClient?.Dispose();
+            _sftpClient?.Dispose();
         }
     }
 }

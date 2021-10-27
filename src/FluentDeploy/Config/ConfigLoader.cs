@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -10,121 +13,109 @@ using YamlDotNet.Serialization;
 namespace FluentDeploy.Config
 {
     public class ConfigLoader
-    {
-        private Dictionary<string, List<HostInformation>> _inventory = new();
-        private Dictionary<string, Dictionary<string, string>> _variables = new ();
-
-        public ConfigLoader()
-        { }
-
-        private void MergeInventory(Dictionary<string, List<HostInformation>> inventory)
-        {
-            foreach (var host in inventory)
-            {
-                if(!_inventory.ContainsKey(host.Key))
-                    _inventory.Add(host.Key, new List<HostInformation>());
-                
-                _inventory[host.Key].AddRange(host.Value);
-            }
-        }
-
-        private void MergeVariables(Dictionary<string, Dictionary<string, string>> vars)
-        {
-            foreach (var variables in vars)
-            {
-                if(!_variables.ContainsKey(variables.Key))
-                    _variables.Add(variables.Key, new Dictionary<string, string>());
-
-                var varDict = _variables[variables.Key];
-
-                foreach (var values in variables.Value)
-                {
-                    if(!varDict.ContainsKey(values.Key))
-                    {
-                        varDict.Add(values.Key, values.Value);
-                        continue;
-                    }
-
-                    varDict[values.Key] = values.Value;
-                }
-            }
-        }
-
-        public ConfigLoader AddInventoryFile(string path)
-        {
-            var deserializer = new DeserializerBuilder().Build();
-            var parser = new Parser(File.OpenText(path));
-            parser.Consume<StreamStart>();
-            parser.Accept<DocumentStart>(out var _);
-            var hosts = deserializer.Deserialize<Dictionary<string, List<HostInformation>>>(parser);
-            MergeInventory(hosts);
-            return this;
-        }
-
-        public ConfigLoader AddVariablesFiles(params string[] paths)
-        {
-            foreach (var path in paths)
-            {
-                AddVariablesFile(path);
-            }
-            return this;
-        }
+    {   
+        private Dictionary<string, Dictionary<string, IConfigurationRoot>> _groupHostConfig = new ();
+        private Dictionary<string, IConfigurationRoot> _hostConfig = new ();
+        private List<(string path, string passphrase)> _secretFiles = new ();
+        private List<string> _configFiles = new();
         
-        public ConfigLoader AddInventoryFiles(params string[] paths)
+        public ConfigLoader AddConfigDirectory(string directoryPath)
         {
-            foreach (var path in paths)
-            {
-                AddInventoryFile(path);
-            }
+            var files = Directory.GetFiles(directoryPath)
+                .Where(x => x.EndsWith("Host.yaml") || x.EndsWith("Group.yaml") || x.EndsWith(".yaml"))
+                .Select(x => new FileInfo(x).FullName);
+            _configFiles.AddRange(files);
             return this;
         }
 
-        public ConfigLoader AddVariablesFile(string path)
+        public ConfigLoader AddSecretFiles(string path, string passphrase)
         {
-            var deserializer = new DeserializerBuilder().Build();
-            var parser = new Parser(File.OpenText(path));
-            parser.Consume<StreamStart>();
-            parser.Accept<DocumentStart>(out var _);
-            var vars = deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
-            MergeVariables(vars);
-            return this;
-        }
-        
-        public ConfigLoader AddCombinedFile(string path)
-        {
-            var deserializer = new DeserializerBuilder().Build();
-            var parser = new Parser(File.OpenText(path));
-            parser.Consume<StreamStart>();
-            parser.Accept<DocumentStart>(out var _);
-            var hosts = deserializer.Deserialize<Dictionary<string, List<HostInformation>>>(parser);
-            MergeInventory(hosts);
-
-            parser.Accept<DocumentStart>(out var _);
-            var vars = deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser) ?? 
-                       new Dictionary<string, Dictionary<string, string>>();
-            MergeVariables(vars);
-            return this;
-        }
-
-        public ConfigLoader AddEncryptedVariablesFile(string path, string passphrase)
-        {
-            var encHandler = new EncryptedConfigFileHandler();
-            encHandler.Load(path, passphrase);
-            var content = encHandler.GetDecryptedFileContent();
-            
-            var deserializer = new DeserializerBuilder().Build();
-            var parser = new Parser(new StringReader(content));
-            parser.Consume<StreamStart>();
-            parser.Accept<DocumentStart>(out var _);
-            var vars = deserializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(parser);
-            MergeVariables(vars);
-            
+            _secretFiles.Add((path, passphrase));
             return this;
         }
 
         public BasicConfig Build()
         {
-            return new BasicConfig() {GroupHosts = _inventory, GroupHostVars = _variables};
+            var groupConfigFiles = _configFiles
+                .Where(x => x.ToLower().Contains("group"))
+                .Select(x =>
+                {
+                    var obj = new DeserializerBuilder()
+                        .IgnoreUnmatchedProperties()
+                        .Build().Deserialize<GroupConfigFileContent>(File.ReadAllText(x));
+                    return (path : x, content : obj);
+                })
+                .ToList();
+            
+            var hostConfigFiles = _configFiles
+                .Where(x => x.ToLower().Contains("host"))
+                .Select(x =>
+                {
+                    var obj = new DeserializerBuilder()
+                        .IgnoreUnmatchedProperties()
+                        .Build().Deserialize<HostConfigFileContent>(File.ReadAllText(x));
+                    return (path : x, content : obj);
+                })
+                .ToList();
+
+            var otherFiles = _configFiles
+                .Where(x => !(x.ToLower().Contains("host") || x.ToLower().Contains("group")))
+                .ToList();
+
+            foreach (var groupConfigFile in groupConfigFiles)
+            {
+                var hostConfigs = new Dictionary<string, IConfigurationRoot>();
+                _groupHostConfig.Add(groupConfigFile.content.GroupName, hostConfigs);
+                
+                foreach (var hostName in groupConfigFile.content.Hosts)
+                {
+                    var cb = new ConfigurationBuilder();
+
+                    // add variable file
+                    otherFiles.ForEach(x => cb.AddYamlFile(x, false, false));
+
+                   var mountedFiles = _secretFiles.Select(x =>
+                    {
+                        var encHandler = new EncryptedConfigFileHandler();
+                        var path = encHandler.MountPlainFile(x.path, x.passphrase);
+                        cb.AddYamlFile(path, false, false);
+                        return encHandler;
+                    }).ToList();
+                    
+                    // add group file
+                    cb.AddYamlFile(groupConfigFile.path, false, false);
+
+                    // override with host files
+                    var hostFile = hostConfigFiles.FirstOrDefault(x => x.content.Name == hostName);
+                    cb.AddYamlFile(hostFile.path, false, false);
+                    hostConfigs.Add(hostName, cb.Build());
+                    mountedFiles.ForEach(x => x.DisposePlainFile());
+                }
+            }
+
+            foreach (var hostConfigFile in hostConfigFiles)
+            {
+                var cb = new ConfigurationBuilder();
+
+                // add variable file
+                otherFiles.ForEach(x => cb.AddYamlFile(x, false, false));
+
+                var mountedFiles = _secretFiles.Select(x =>
+                {
+                    var encHandler = new EncryptedConfigFileHandler();
+                    var path = encHandler.MountPlainFile(x.path, x.passphrase);
+                    cb.AddYamlFile(path, false, false);
+                    return encHandler;
+                }).ToList();
+                
+                // add hostfile file
+                cb.AddYamlFile(hostConfigFile.path, false, false);
+
+                _hostConfig.Add(hostConfigFile.content.Name, cb.Build());
+                mountedFiles.ForEach(x => x.DisposePlainFile());
+            }
+            
+            return new BasicConfig(_groupHostConfig, _hostConfig);
         }
     }
 }

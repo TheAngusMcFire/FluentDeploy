@@ -180,6 +180,22 @@ namespace FluentDeploy.Config
             return builder.ToString();
         }
 
+        private string _tmpFileName;
+        public string MountPlainFile(string path, string passphrase)
+        {
+            Load(path, passphrase);
+            
+            var decLines = DecryptLines(_file.Lines, _key, _nonce, _refTag);
+            _tmpFileName = $"/tmp/dec_fd_{DateTime.Now.Ticks}.yaml";
+            File.WriteAllLines(_tmpFileName, decLines);
+            return _tmpFileName;
+        }
+
+        public void DisposePlainFile()
+        {
+            File.Delete(_tmpFileName);
+        }
+
         public void Edit(string path, string passphrase)
         {
             var editor = Environment.GetEnvironmentVariable("EDITOR") 
