@@ -11,7 +11,8 @@ namespace FluentDeploy.Config
         public IConfigurationRoot Config { get; set; }
 
         public string GetConfigString(string key) => 
-            Config.GetSection($"Vars:{key}").Value;
+            Config.GetSection($"Vars:{key}").Value ??
+            throw new KeyNotFoundException();
 
         public int GetConfigInt(string key) 
             => Convert.ToInt32(GetConfigString(key));

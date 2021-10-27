@@ -43,10 +43,19 @@ namespace FluentDeploy.HostLogic
             return (hostName, port);
         }
 
+        public static Host BuildHost(HostConfig config, BasicConfig basicConfig)
+        {
+            if (config.HostInfo.JumpHost == null)
+                return new Host(config);
+
+            var jumpHostConfig = basicConfig.GetHostConfig(config.HostInfo.JumpHost);
+            var jHost = BuildHost(jumpHostConfig, basicConfig);
+            return jHost.AsJumpHost(config);
+        }
+        
         public Host(HostConfig config)
         {
             _logger = Log.ForContext<Host>();
-
             var (hostName, port) = GetConnectionParameters(config);
             
             Executor = new RemoteExecutor(hostName, port, config.HostInfo.User, KeyStore.Default.PrivateKeyFiles.ToArray());
