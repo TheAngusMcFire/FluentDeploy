@@ -257,7 +257,7 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         /// </summary>
         /// <value>Disable OOM Killer for the container.</value>
         [DataMember(Name = "OomKillDisable", EmitDefaultValue = false)]
-        public bool OomKillDisable { get; set; }
+        public bool? OomKillDisable { get; set; }
 
         /// <summary>
         ///     Run an init inside the container that forwards signals and reaps processes. This field is omitted if empty, and the
