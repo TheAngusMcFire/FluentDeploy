@@ -27,6 +27,15 @@ namespace FluentDeploy.Components.Docker
         private bool _started;
         private bool _restart;
         private bool _forcePullImage;
+        private DockerApi.DockerApi _api;
+
+        public DockerContainerBuilder(IDockerHttpClient client, string name, string image)
+        {
+            _name = name;
+            _image = image;
+            _logger = Log.ForContext<DockerContainerBuilder>();
+            _api = new DockerApi.DockerApi(client);
+        }
 
         public DockerContainerBuilder(string name, string image)
         {
@@ -34,11 +43,23 @@ namespace FluentDeploy.Components.Docker
             _image = image;
             _logger = Log.ForContext<DockerContainerBuilder>();
         }
-
+        
         public DockerContainerBuilder AddMount(string source, string destination, string options = null)
         {
+            AddMount($"{source}:{destination}", options);
+            return this;
+        }
+        
+        public DockerContainerBuilder AddMount(string mount, string options = null)
+        {
             var opt = options != null ? $":{options}" : null;
-            _mounts.Add($"{source}:{destination}{opt}");
+            AddMount($"{mount}{opt}");
+            return this;
+        }
+        
+        public DockerContainerBuilder AddMount(string mountString)
+        {
+            _mounts.Add(mountString);
             return this;
         }
         
@@ -184,16 +205,24 @@ namespace FluentDeploy.Components.Docker
             }
         }
 
+        public void Execute()
+        {
+            Execute(null);
+        }
+
         protected override void Execute(IExecutionContext context)
         {
-            var api = new DockerApi.DockerApi(new CurlDockerHttpClient(context) {Timeout = 600});
+            if (_api == null)
+            {
+                _api = new DockerApi.DockerApi(new CurlDockerHttpClient(context) {Timeout = 600});
+            }
             
-            var targetImage = api.InspectImage(_image); 
+            var targetImage = _api.InspectImage(_image); 
 
             if (targetImage == null || _forcePullImage)
             {
-                _logger.Debug(api.PullImage(_image));
-                targetImage = api.InspectImage(_image);
+                _logger.Debug(_api.PullImage(_image));
+                targetImage = _api.InspectImage(_image);
 
                 if (targetImage is null)
                 {
@@ -201,34 +230,34 @@ namespace FluentDeploy.Components.Docker
                 }
             }
             
-            var container = api.InspectContainer(_name);
+            var container = _api.InspectContainer(_name);
 
             if (container == null)
             {
-                CreateDockerContainer(api);
+                CreateDockerContainer(_api);
                 
                 if (_started)
-                    api.StartContainer(_name);
+                    _api.StartContainer(_name);
             }
             else
             {
                 if (CheckIfContainerNeedsUpdating(container, targetImage.Id) || _forcePullImage)
                 {
                     var tmpName = $"{_name}_tmp_{DateTime.Now.Ticks}";
-                    api.RenameContainer(_name, tmpName);
-                    CreateDockerContainer(api);
-                    api.StopContainer(tmpName);
+                    _api.RenameContainer(_name, tmpName);
+                    CreateDockerContainer(_api);
+                    _api.StopContainer(tmpName);
 
                     if(_started && !_restart)
-                        api.StartContainer(_name);
+                        _api.StartContainer(_name);
 
-                    api.DeleteContainer(tmpName);
+                    _api.DeleteContainer(tmpName);
                 }
             }
 
             if (_restart)
             {
-                api.RestartContainer(_name);
+                _api.RestartContainer(_name);
             }
         }
     }

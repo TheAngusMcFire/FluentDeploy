@@ -41,14 +41,10 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         /// <param name="data">data (required).</param>
         public GraphDriverData(string name = default, Dictionary<string, string> data = default)
         {
-            // to ensure "name" is required (not null)
-            if (name == null)
-                throw new InvalidDataException("name is a required property for GraphDriverData and cannot be null");
+
             Name = name;
 
-            // to ensure "data" is required (not null)
-            if (data == null)
-                throw new InvalidDataException("data is a required property for GraphDriverData and cannot be null");
+
             Data = data;
         }
 

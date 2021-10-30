@@ -63,69 +63,6 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
             string osVersion = default, long size = default, long virtualSize = default,
             GraphDriverData graphDriver = default, ImageRootFS rootFS = default, ImageMetadata metadata = default)
         {
-            // to ensure "id" is required (not null)
-            if (id == null)
-                throw new InvalidDataException("id is a required property for Image and cannot be null");
-            Id = id;
-
-            // to ensure "parent" is required (not null)
-            if (parent == null)
-                throw new InvalidDataException("parent is a required property for Image and cannot be null");
-            Parent = parent;
-
-            // to ensure "comment" is required (not null)
-            if (comment == null)
-                throw new InvalidDataException("comment is a required property for Image and cannot be null");
-            Comment = comment;
-
-            // to ensure "created" is required (not null)
-            if (created == null)
-                throw new InvalidDataException("created is a required property for Image and cannot be null");
-            Created = created;
-
-            // to ensure "container" is required (not null)
-            if (container == null)
-                throw new InvalidDataException("container is a required property for Image and cannot be null");
-            Container = container;
-
-            // to ensure "dockerVersion" is required (not null)
-            if (dockerVersion == null)
-                throw new InvalidDataException("dockerVersion is a required property for Image and cannot be null");
-            DockerVersion = dockerVersion;
-
-            // to ensure "author" is required (not null)
-            if (author == null)
-                throw new InvalidDataException("author is a required property for Image and cannot be null");
-            Author = author;
-
-            // to ensure "architecture" is required (not null)
-            if (architecture == null)
-                throw new InvalidDataException("architecture is a required property for Image and cannot be null");
-            Architecture = architecture;
-
-            // to ensure "os" is required (not null)
-            if (os == null)
-                throw new InvalidDataException("os is a required property for Image and cannot be null");
-            Os = os;
-
-            // to ensure "size" is required (not null)
-            if (size == null)
-                throw new InvalidDataException("size is a required property for Image and cannot be null");
-            Size = size;
-
-            // to ensure "virtualSize" is required (not null)
-            if (virtualSize == null)
-                throw new InvalidDataException("virtualSize is a required property for Image and cannot be null");
-            VirtualSize = virtualSize;
-
-            // to ensure "graphDriver" is required (not null)
-            if (graphDriver == null)
-                throw new InvalidDataException("graphDriver is a required property for Image and cannot be null");
-            GraphDriver = graphDriver;
-
-            // to ensure "rootFS" is required (not null)
-            if (rootFS == null)
-                throw new InvalidDataException("rootFS is a required property for Image and cannot be null");
             RootFS = rootFS;
 
             RepoTags = repoTags;
