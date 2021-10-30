@@ -90,9 +90,9 @@ namespace FluentDeploy.Components.Docker.DockerApi
             return _client.Post<string>($"{DockerUrl}/networks/{networkId}/connect", req, 200).Result;
         }
 
-        public string PullImage(string image)
+        public string PullImage(string image, string authToken)
         {
-            return _client.Post<string>($"{DockerUrl}/images/create?fromImage={image}", new object(), 200).Result;
+            return _client.Post<string>($"{DockerUrl}/images/create?fromImage={image}", new object(), 200, authToken).Result;
         }
         
         public Image InspectImage(string nameOrId)

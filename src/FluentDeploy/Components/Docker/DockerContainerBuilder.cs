@@ -23,6 +23,7 @@ namespace FluentDeploy.Components.Docker
         private readonly List<string> _commands = null;
         private readonly List<string> _capabilities = new();
         private readonly List<string> _entrypoint = new();
+        private string _authToken;
         private string _hostname;
         private bool _started;
         private bool _restart;
@@ -89,6 +90,9 @@ namespace FluentDeploy.Components.Docker
         
         public DockerContainerBuilder Hostname(string hostname) => 
             FluentExec(() => _hostname = hostname);
+        
+        public DockerContainerBuilder RegistryAuthToken(string token) => 
+            FluentExec(() => _authToken = token);
         
         public DockerContainerBuilder AddNetwork(string networkName) => 
             FluentExec(() => _networks.Add(networkName));
@@ -221,7 +225,7 @@ namespace FluentDeploy.Components.Docker
 
             if (targetImage == null || _forcePullImage)
             {
-                _logger.Debug(_api.PullImage(_image));
+                _logger.Debug(_api.PullImage(_image, _authToken));
                 targetImage = _api.InspectImage(_image);
 
                 if (targetImage is null)

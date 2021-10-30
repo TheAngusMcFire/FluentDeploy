@@ -45,12 +45,24 @@ namespace FluentDeploy.Components.Docker.DockerApi
             return await JsonSerializer.DeserializeAsync<T>(await res.Content.ReadAsStreamAsync());
         }
 
-        public async Task<T> Post<T>(string url, object payload, int expectedReturnCode) where T : class
+        public async Task<T> Post<T>(string url, object payload, int expectedReturnCode, string authToken) where T : class
         {
-            var res = await _httpClient.PostAsync(url, JsonContent.Create(payload));
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+            
+            if (authToken != null)
+            {
+                requestMessage.Headers.Add("X-Registry-Auth", authToken);
+            }
+
+            requestMessage.Content = JsonContent.Create(payload);
+
+            var res = await _httpClient.SendAsync(requestMessage);
+            
             if(res.StatusCode == HttpStatusCode.NotFound || res.StatusCode == HttpStatusCode.NotModified)
                 return null;
+            
             ValidateReturnCode(res.StatusCode, expectedReturnCode);
+            
             if (typeof(T) == typeof(string))
                 return await res.Content.ReadAsStringAsync() as T;
 
