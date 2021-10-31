@@ -158,7 +158,7 @@ namespace FluentDeploy.Components.Docker
             return false;
         }
 
-        private void CreateDockerContainer(DockerApi.DockerApi api)
+        private string CreateDockerContainer(DockerApi.DockerApi api)
         {
             var endpoints = new Dictionary<string, EndpointSettings>();
             var networks = api.GetNetworks();
@@ -207,6 +207,8 @@ namespace FluentDeploy.Components.Docker
                     api.ConnectToNetwork(newId, nwi.Id);
                 }
             }
+
+            return newId;
         }
 
         public void Execute()
@@ -238,10 +240,10 @@ namespace FluentDeploy.Components.Docker
 
             if (container == null)
             {
-                CreateDockerContainer(_api);
+                var id = CreateDockerContainer(_api);
                 
                 if (_started)
-                    _api.StartContainer(_name);
+                    _api.StartContainer(id);
             }
             else
             {

@@ -23,17 +23,17 @@ namespace FluentDeploy.Components.Docker.DockerApi
             }
         });
 
-        private void ValidateReturnCode(HttpStatusCode actual, int expected)
+        private void ValidateReturnCode(HttpResponseMessage msg, int expected)
         {
-            if (actual != (HttpStatusCode) expected)
+            if (msg.StatusCode != (HttpStatusCode) expected)
                 throw new InvalidOperationException(
-                    $"Error unexpected return code: {actual} but should be: {expected}");
+                    $"Error unexpected return code: {msg.StatusCode} but should be: {expected}  | msg: {msg.Content.ReadAsStringAsync().Result}");
         }
 
         public async Task Delete(string url, int expectedReturnCode)
         {
             var res = await _httpClient.DeleteAsync(url);
-            ValidateReturnCode(res.StatusCode, expectedReturnCode);
+            ValidateReturnCode(res, expectedReturnCode);
         }
 
         public async Task<T> Get<T>(string url, int expectedReturnCode) where T : class
@@ -41,7 +41,7 @@ namespace FluentDeploy.Components.Docker.DockerApi
             var res = await _httpClient.GetAsync(url);
             if(res.StatusCode == HttpStatusCode.NotFound)
                 return null;
-            ValidateReturnCode(res.StatusCode, expectedReturnCode);
+            ValidateReturnCode(res, expectedReturnCode);
             return await JsonSerializer.DeserializeAsync<T>(await res.Content.ReadAsStreamAsync());
         }
 
@@ -54,14 +54,15 @@ namespace FluentDeploy.Components.Docker.DockerApi
                 requestMessage.Headers.Add("X-Registry-Auth", authToken);
             }
 
-            requestMessage.Content = JsonContent.Create(payload);
+            if(payload != null)
+                requestMessage.Content = JsonContent.Create(payload);
 
             var res = await _httpClient.SendAsync(requestMessage);
             
             if(res.StatusCode == HttpStatusCode.NotFound || res.StatusCode == HttpStatusCode.NotModified)
                 return null;
             
-            ValidateReturnCode(res.StatusCode, expectedReturnCode);
+            ValidateReturnCode(res, expectedReturnCode);
             
             if (typeof(T) == typeof(string))
                 return await res.Content.ReadAsStringAsync() as T;

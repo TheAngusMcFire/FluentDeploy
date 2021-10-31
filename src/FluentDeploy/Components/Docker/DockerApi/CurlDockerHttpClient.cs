@@ -59,9 +59,13 @@ namespace FluentDeploy.Components.Docker.DockerApi
 
         public Task<T> Post<T>(string url, object payload, int expectedReturnCode,  string authToken) where T : class
         {
-            var curl = GetCurlCommand(url, HttpMethod.Post)
-                .AddHeader("Content-Type", "application/json")
-                .WithBody(JsonSerializer.Serialize(payload));
+            var curl = GetCurlCommand(url, HttpMethod.Post);
+
+            if (payload != null)
+            {
+                curl.AddHeader("Content-Type", "application/json")
+                    .WithBody(JsonSerializer.Serialize(payload));
+            }
 
             if (authToken != null)
             {
