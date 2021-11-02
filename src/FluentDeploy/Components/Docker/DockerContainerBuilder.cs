@@ -28,6 +28,8 @@ namespace FluentDeploy.Components.Docker
         private bool _started;
         private bool _restart;
         private bool _forcePullImage;
+        private bool _restartUnlessStopped;
+        private bool _restartAlways;
         private DockerApi.DockerApi _api;
 
         public DockerContainerBuilder(IDockerHttpClient client, string name, string image)
@@ -100,6 +102,11 @@ namespace FluentDeploy.Components.Docker
         public DockerContainerBuilder Started(bool started = true) => 
             FluentExec(() => _started = started);
 
+        public DockerContainerBuilder RestartUnlessStopped(bool restart = true) => 
+            FluentExec(() => _restartUnlessStopped = restart);
+        
+        public DockerContainerBuilder RestartAlways(bool restart = true) => 
+            FluentExec(() => _restartAlways = restart);
         public DockerContainerBuilder Restart(bool restart = true) => 
             FluentExec(() => _restart = restart);
         
@@ -171,7 +178,10 @@ namespace FluentDeploy.Components.Docker
                     NetworkID = networks.First(y => y.Name == nw).Id
                 });
             }
-        
+
+            var restartPolicy = _restartAlways ? RestartPolicy.NameEnum.Always :
+                _restartUnlessStopped ? RestartPolicy.NameEnum.UnlessStopped : RestartPolicy.NameEnum.Empty;
+            
             var config = new ContainerConfig()
             {
                 Hostname = _hostname,
@@ -187,7 +197,12 @@ namespace FluentDeploy.Components.Docker
                 {
                     Binds = _mounts,
                     PortBindings = _portMapping,
-                    Capabilities = _capabilities.Count == 0 ? null : _capabilities
+                    Capabilities = _capabilities.Count == 0 ? null : _capabilities,
+                    RestartPolicy = new RestartPolicy()
+                    {
+                        Name = restartPolicy,
+                        MaximumRetryCount = null
+                    }
                 }
             };
 

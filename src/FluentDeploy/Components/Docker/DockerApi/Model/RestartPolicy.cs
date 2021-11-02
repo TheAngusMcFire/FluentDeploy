@@ -74,7 +74,7 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         ///     the container exit code is non-zero .
         /// </param>
         /// <param name="maximumRetryCount">If &#x60;on-failure&#x60; is used, the number of times to retry before giving up. .</param>
-        public RestartPolicy(NameEnum? name = default, int maximumRetryCount = default)
+        public RestartPolicy(NameEnum? name = default, int? maximumRetryCount = default)
         {
             Name = name;
             MaximumRetryCount = maximumRetryCount;
@@ -99,7 +99,7 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
         /// </summary>
         /// <value>If &#x60;on-failure&#x60; is used, the number of times to retry before giving up. </value>
         [DataMember(Name = "MaximumRetryCount", EmitDefaultValue = false)]
-        public int MaximumRetryCount { get; set; }
+        public int? MaximumRetryCount { get; set; }
 
         /// <summary>
         ///     Returns true if RestartPolicy instances are equal
