@@ -16,6 +16,14 @@ namespace FluentDeploy.Config
             _hostConfig = hostConfig;
         }
 
+        public string[] GetHostAndGroupNames()
+        {
+            var lst = new List<string>();
+            lst.AddRange(_hostConfig.Select(x => x.Key));
+            lst.AddRange(_groupHostConfig.Select(x => x.Key));
+            return lst.ToArray();
+        }
+        
         public HostConfig GetHostConfig(string hostName)
         {
             var hostInfo = new HostInformation();
