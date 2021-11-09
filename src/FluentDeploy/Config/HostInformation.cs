@@ -7,7 +7,7 @@ namespace FluentDeploy.Config
         public string Host { get; set; }
         public string User { get; set; }
         public string Distribution { get; set; }
-        
         public string JumpHost { get; set; }
+        public bool Virtual { get; set; }
     }
 }

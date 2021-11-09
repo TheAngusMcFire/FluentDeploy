@@ -56,12 +56,12 @@ namespace FluentDeploy.ExecutionUtils
             Environment.Exit(0);
         }
 
-        private void ExecutePlaybooks(string host, string playbooks)
+        private void ExecutePlaybooks(string host, string playbooks, BasicConfig config)
         {
             Environment.Exit(0);
         }
 
-        public void DispatchDefaultOptions(string[] args)
+        public void DispatchDefaultOptions(string[] args, BasicConfig config)
         {
             if (args.Length == 1)
             {
@@ -74,7 +74,7 @@ namespace FluentDeploy.ExecutionUtils
             
             if (args.Length == 2)
             {
-                ExecutePlaybooks(args[0], args[1]);
+                ExecutePlaybooks(args[0], args[1], config);
             }
             
             PrintUsage();

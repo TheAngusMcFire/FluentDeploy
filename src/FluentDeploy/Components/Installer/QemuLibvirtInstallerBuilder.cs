@@ -11,7 +11,7 @@ namespace FluentDeploy.Components.Installer
         {
             if (context.DistributionVariant.DistributionVariantType == DistributionVariantType.Debian)
             {
-                AptGet.Install("qemu-system", "libvirt-clients", "libvirt-daemon-system")
+                AptGet.Install("qemu-system", "libvirt-clients", "libvirt-daemon-system", "virtinst")
                     .NoRecommends()
                     .ExecuteOn(context);
 
