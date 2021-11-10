@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentDeploy.Config;
+using FluentDeploy.HostLogic;
 using Serilog;
 
 namespace FluentDeploy.ExecutionUtils
@@ -56,8 +57,20 @@ namespace FluentDeploy.ExecutionUtils
             Environment.Exit(0);
         }
 
-        private void ExecutePlaybooks(string host, string playbooks, BasicConfig config)
+        private void ExecutePlaybooks(string hostName, string playbooks, BasicConfig config)
         {
+            var hostConfig = config.GetHostConfig(hostName);
+            var host = Host.BuildHost(hostConfig, config);
+
+            var playbookNames = _playbooks.Select(x => x.Key).ToArray();
+            var comps = playbooks.Split(new[] {","}, StringSplitOptions.RemoveEmptyEntries);
+            
+            foreach (var playBook in comps)
+            {
+                var targetBook = int.TryParse(playBook, out int idx) ? playbookNames[idx] : playBook;
+                host.ExecutePlaybook(_playbooks[targetBook]);
+            }
+
             Environment.Exit(0);
         }
 
