@@ -44,15 +44,24 @@ namespace FluentDeploy.ExecutionUtils
             Environment.Exit(-1);
         }
 
+        private string GetSep()
+        {
+            var sepLen = Console.WindowWidth - 20;
+            Log.Information("{0}",sepLen);
+            var sep = "";
+            while (sepLen-- > 0) sep += "-";
+            return sep;
+        }
+        
         private void ListHostsAndPlaybooks()
         {
             var mayIndex = Math.Max(_playbooks.Count, _hostsAndGroup.Length);
             var playbookNames = _playbooks.Select(x => x.Key).ToArray();
             var spacing = -(_hostsAndGroup.Max(x => x.Length) + 2);
 
-            Log.Information($"--------------------------------------------------------------------------------");
+            Log.Information(GetSep());
             Log.Information($"{{0,{spacing.ToString()}}} |    {{1}}", "Hosts:", "Playbooks:");
-            Log.Information($"--------------------------------------------------------------------------------");
+            Log.Information(GetSep());
             for (var index = 0; index < mayIndex; index++)
             {
                 var playbook = index < playbookNames.Length ? playbookNames[index] : ""; 
