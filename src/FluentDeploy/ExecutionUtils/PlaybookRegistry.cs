@@ -27,10 +27,15 @@ namespace FluentDeploy.ExecutionUtils
                     .Last();
 
             var methodName = playBook.Method.Name;
-            _playbooks.Add($"{typeName}.{methodName}", playBook);
-            return this;
+            return AddPlaybook($"{typeName}.{methodName}", playBook);
         }
 
+        public PlaybookRegistry AddPlaybook(string name, Action<HostContext, HostConfig> playBook)
+        {
+            _playbooks.Add(name, playBook);
+            return this;
+        }
+        
         private void PrintUsage()
         {
             Log.Information("Usage:");
