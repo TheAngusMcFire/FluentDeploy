@@ -47,7 +47,6 @@ namespace FluentDeploy.ExecutionUtils
         private string GetSep()
         {
             var sepLen = Console.WindowWidth - 20;
-            Log.Information("{0}",sepLen);
             var sep = "";
             while (sepLen-- > 0) sep += "-";
             return sep;
