@@ -25,6 +25,7 @@ namespace FluentDeploy.HostLogic
             {
                 "Debian" => new DebianVariant(),
                 "Arch" => new ArchVariant(),
+                "Ubuntu" => new DebianVariant(),
                 _ => throw new ArgumentOutOfRangeException(nameof(distributionName), distributionName, null)
             };
         }
