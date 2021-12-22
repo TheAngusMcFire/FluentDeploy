@@ -15,8 +15,8 @@ namespace FluentDeploy.Commands
         public Stream StandardInput { get; set; }
         private ICommandExecutionValidator _validator = new ReturnCodeConsoleCommandValidator(0);
 
-        public static ConsoleCommand Exec(string executableName) => new ()
-            { ExecutableName = executableName, Arguments = Array.Empty<string>()};
+        public static ConsoleCommand Exec(string executableName, params string[] arguments) => new ()
+            { ExecutableName = executableName, Arguments = arguments};
 
         private ConsoleCommand()
         {
