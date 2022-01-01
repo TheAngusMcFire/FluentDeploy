@@ -57,11 +57,15 @@ namespace FluentDeploy.HostLogic
         public Host(HostConfig config)
         {
             _logger = Log.ForContext<Host>();
+            Config = config;
+            
+            if (config.HostInfo.Virtual)
+                return;
+            
             var (hostName, port) = GetConnectionParameters(config);
             
             Executor = new RemoteExecutor(hostName, port, config.HostInfo.User, KeyStore.Default.PrivateKeyFiles.ToArray());
             var engine = new ExecutionEngine.ExecutionEngine(this, Executor);
-            Config = config;
             Context = CreateHostContext(engine, config.HostInfo.Distribution);
         }
 
