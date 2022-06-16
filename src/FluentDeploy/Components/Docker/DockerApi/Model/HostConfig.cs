@@ -1380,5 +1380,10 @@ namespace FluentDeploy.Components.Docker.DockerApi.Model
                 return hashCode;
             }
         }
+
+        public string GetConfigString(string backupRepoPassword)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
