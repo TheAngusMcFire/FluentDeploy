@@ -3,7 +3,12 @@ using YamlDotNet.Serialization;
 
 namespace FluentDeploy.Components.K8s
 {
-    public class K8SConfigObjectBuilder
+    public interface IK8SConfigObjectBuilder
+    {
+        string BuildConfig();
+    }
+    
+    public class K8SConfigObjectBuilder : IK8SConfigObjectBuilder
     {
         internal class MetadataObject
         {
@@ -14,27 +19,39 @@ namespace FluentDeploy.Components.K8s
             [YamlMember(Alias = "annotations")]
             public Dictionary<string, string> Annotations { get; set; }
         }
+
+        private object baseObject;
+        private MetadataObject _metadataObject; 
         
-        public object BuildMetadataObject(string name, string namesp, Dictionary<string, string> annotations)
+        public K8SConfigObjectBuilder SetConfigObjectMetadata(string name, string namesp, Dictionary<string, string> annotations)
         {
-            return new MetadataObject()
+            _metadataObject = new MetadataObject()
             {
                 Name = name,
                 NameSpace = namesp,
                 Annotations = annotations
             };
+            return this;
         }
         
-        public string BuildConfigObject(string kind, string version, object spec, object metadata)
+        public K8SConfigObjectBuilder SetConfigObjectHeader(string kind, string version, object spec)
         {
-            var obj = new
+            baseObject = new
             {
                 apiVersion = version,
                 kind = kind,
-                metadata = metadata,
+                metadata = _metadataObject,
                 spec = spec
             };
-            return new YamlDotNet.Serialization.Serializer().Serialize(obj);
+            return this;
+        }
+
+        public string BuildConfig()
+        {
+            return new SerializerBuilder()
+                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                .Build()
+                .Serialize(this.baseObject);
         }
     }
 }

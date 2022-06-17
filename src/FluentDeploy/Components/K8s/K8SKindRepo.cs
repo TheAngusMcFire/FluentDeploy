@@ -7,5 +7,6 @@ namespace FluentDeploy.Components.K8s
         public const string Service = nameof(Service);
         public const string Deployment = nameof(Deployment);
         public const string Ingress = nameof(Ingress);
+        public const string Namespace = nameof(Namespace);
     }
 }
