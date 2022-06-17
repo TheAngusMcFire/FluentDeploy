@@ -63,6 +63,22 @@ namespace FluentDeploy.Components.K8s
                     }));
             return this;
         }
+        
+        public K8SConfigBuilder AddService(out string newName, string name = null, string selector = null, string type = null, K8SPort[] ports = null)
+        {
+            newName = name ?? $"{_baseName}-svc";
+            _builders.Add(
+                new K8SConfigObjectBuilder().SetConfigObjectMetadata(newName, Namespace, null)
+                    .SetConfigObjectHeader(K8SKindRepo.Service, K8SVersionRepo.Default, new
+                    {
+                        type = type,
+                        selector = new {
+                            app = selector
+                        },
+                        ports = ports
+                    }));
+            return this;
+        }
 
         public string GetConfigFile()
         {

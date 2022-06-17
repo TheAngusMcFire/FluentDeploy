@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace FluentDeploy.Components.K8s
 {
@@ -12,11 +13,8 @@ namespace FluentDeploy.Components.K8s
     {
         internal class MetadataObject
         {
-            [YamlMember(Alias = "name")]
             public string Name { get; set; }
-            [YamlMember(Alias = "namespace")]
-            public string NameSpace { get; set; }
-            [YamlMember(Alias = "annotations")]
+            public string Namespace { get; set; }
             public Dictionary<string, string> Annotations { get; set; }
         }
 
@@ -28,7 +26,7 @@ namespace FluentDeploy.Components.K8s
             _metadataObject = new MetadataObject()
             {
                 Name = name,
-                NameSpace = namesp,
+                Namespace = namesp,
                 Annotations = annotations
             };
             return this;
@@ -50,6 +48,7 @@ namespace FluentDeploy.Components.K8s
         {
             return new SerializerBuilder()
                 .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build()
                 .Serialize(this.baseObject);
         }
