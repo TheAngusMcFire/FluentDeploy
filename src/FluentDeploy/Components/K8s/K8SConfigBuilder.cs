@@ -106,6 +106,15 @@ namespace FluentDeploy.Components.K8s
             return this;
         }
 
+        public K8SConfigBuilder AddConfigMap(out string newName, string name = null, Dictionary<string, string> data = null)
+        {
+            newName = name ?? $"{_baseName}-cm";
+            _builders.Add(
+                new K8SConfigObjectBuilder().SetConfigObjectMetadata(newName, Namespace, null)
+                    .SetConfigObjectHeaderForConfigMap(K8SKindRepo.ConfigMap, K8SVersionRepo.Default, data));
+            return this;
+        }
+
         public string GetConfigFile()
         {
             var builder = new StringBuilder();

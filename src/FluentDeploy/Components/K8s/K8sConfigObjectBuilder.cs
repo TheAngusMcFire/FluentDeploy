@@ -43,6 +43,18 @@ namespace FluentDeploy.Components.K8s
             };
             return this;
         }
+        
+        public K8SConfigObjectBuilder SetConfigObjectHeaderForConfigMap(string kind, string version, object data)
+        {
+            baseObject = new
+            {
+                apiVersion = version,
+                kind = kind,
+                metadata = _metadataObject,
+                data = data
+            };
+            return this;
+        }
 
         public string BuildConfig()
         {
