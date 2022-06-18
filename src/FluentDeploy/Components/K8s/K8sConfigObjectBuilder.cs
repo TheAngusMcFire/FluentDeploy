@@ -49,6 +49,7 @@ namespace FluentDeploy.Components.K8s
             return new SerializerBuilder()
                 .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .DisableAliases()
                 .Build()
                 .Serialize(this.baseObject);
         }

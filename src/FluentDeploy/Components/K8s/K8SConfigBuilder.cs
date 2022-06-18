@@ -46,7 +46,7 @@ namespace FluentDeploy.Components.K8s
             return this;
         }
         
-        public K8SConfigBuilder AddNfsPersistentVolumeClaim(out string newName, string name = null, string storageClass = null, string capacity = null)
+        public K8SConfigBuilder AddNfsPersistentVolumeClaim(out string newName, string name = null, string storageClass = null, string capacity = null, string volumeName = null)
         {
             newName = name ?? $"{_baseName}-pvc";
             _builders.Add(
@@ -54,6 +54,7 @@ namespace FluentDeploy.Components.K8s
                     .SetConfigObjectHeader(K8SKindRepo.PersistentVolumeClaim, K8SVersionRepo.Default, new
                     {
                         storageClassName = storageClass,
+                        volumeName = volumeName,
                         resources = new {
                             requests =  new {
                                 storage = capacity
@@ -64,7 +65,7 @@ namespace FluentDeploy.Components.K8s
             return this;
         }
         
-        public K8SConfigBuilder AddService(out string newName, string name = null, string selector = null, string type = null, K8SPort[] ports = null)
+        public K8SConfigBuilder AddService(out string newName, string name = null, string selector = null, string type = null, params K8SPort[] ports)
         {
             newName = name ?? $"{_baseName}-svc";
             _builders.Add(
@@ -77,6 +78,31 @@ namespace FluentDeploy.Components.K8s
                         },
                         ports = ports
                     }));
+            return this;
+        }
+
+        public K8SConfigBuilder AddDeployment(out string newName, string name = null, Action<K8SDeploymentConfigBuilder> builderFn = null)
+        {
+            newName = name ?? $"{_baseName}-depl";
+            var builder = new K8SDeploymentConfigBuilder(name ?? _baseName);
+            if(builderFn is not null)
+                builderFn(builder);
+            _builders.Add(
+                new K8SConfigObjectBuilder().SetConfigObjectMetadata(newName, Namespace, null)
+                    .SetConfigObjectHeader(K8SKindRepo.Deployment, K8SVersionRepo.Default, builder.Build()));
+            return this;
+        }
+        
+        public K8SConfigBuilder AddIngress(out string newName, string name = null, string ingressClass = null, Action<K8SIngressConfigBuilder> builderFn = null)
+        {
+            newName = name ?? $"{_baseName}-ingress";
+            var builder = new K8SIngressConfigBuilder(ingressClass);
+            if (builderFn != null) builderFn(builder);
+            var spec = builder.Build();
+            var annotations = builder.GetAnnotations();
+            _builders.Add(
+                new K8SConfigObjectBuilder().SetConfigObjectMetadata(newName, Namespace, annotations)
+                    .SetConfigObjectHeader(K8SKindRepo.Ingress, K8SVersionRepo.Default, spec));
             return this;
         }
 
