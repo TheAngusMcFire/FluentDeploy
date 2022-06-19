@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using Serilog;
 
 namespace FluentDeploy.Components.K8s
 {
@@ -89,7 +91,7 @@ namespace FluentDeploy.Components.K8s
                 builderFn(builder);
             _builders.Add(
                 new K8SConfigObjectBuilder().SetConfigObjectMetadata(newName, Namespace, null)
-                    .SetConfigObjectHeader(K8SKindRepo.Deployment, K8SVersionRepo.Default, builder.Build()));
+                    .SetConfigObjectHeader(K8SKindRepo.Deployment, K8SVersionRepo.Apps, builder.Build()));
             return this;
         }
         
@@ -123,8 +125,35 @@ namespace FluentDeploy.Components.K8s
                 builder.AppendLine("---");
                 builder.AppendLine(x.BuildConfig());
             });
-            Console.WriteLine(builder.ToString());
+            Log.Debug(builder.ToString());
             return builder.ToString();
+        }
+
+        public void ApplyTo(string configPath)
+        {
+            var configFile = GetConfigFile();
+            var process = new Process();
+            var nfo = new ProcessStartInfo("kubectl");
+            nfo.Arguments = $"--kubeconfig {configPath} apply -f -";
+            nfo.RedirectStandardInput = true;
+            nfo.RedirectStandardOutput = true;
+            nfo.RedirectStandardError = true;
+            nfo.UseShellExecute = false;
+            process.StartInfo = nfo;
+            process.Start();
+            
+            process.StandardInput.Write(configFile);
+            process.StandardInput.Flush();
+            process.StandardInput.Close();
+            process.WaitForExit();
+            var error = process.StandardError.ReadToEnd();
+            var stdout = process.StandardOutput.ReadToEnd();
+            if (error.Length is not 0)
+            {
+                Log.Information(configFile);
+                Log.Information(stdout);
+                Log.Error("Error applying configuration {0}", error);
+            }
         }
     }
 }

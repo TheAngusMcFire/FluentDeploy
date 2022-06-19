@@ -79,7 +79,7 @@ namespace FluentDeploy.Components.K8s
                 },
                 template = new
                 {
-                    meatdata = new
+                    metadata = new
                     {
                         labels = new
                         {
