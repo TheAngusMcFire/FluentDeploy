@@ -9,6 +9,6 @@ namespace FluentDeploy.Components.K8s
     {
         public string Protocol { get; set; }
         public int Port { get; set; }
-        public int TargetPort { get; set; }
+        public int? TargetPort { get; set; }
     }
 }

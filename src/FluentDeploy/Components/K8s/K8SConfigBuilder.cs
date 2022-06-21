@@ -104,7 +104,7 @@ namespace FluentDeploy.Components.K8s
             var annotations = builder.GetAnnotations();
             _builders.Add(
                 new K8SConfigObjectBuilder().SetConfigObjectMetadata(newName, Namespace, annotations)
-                    .SetConfigObjectHeader(K8SKindRepo.Ingress, K8SVersionRepo.Default, spec));
+                    .SetConfigObjectHeader(K8SKindRepo.Ingress, K8SVersionRepo.Networking, spec));
             return this;
         }
 
@@ -129,6 +129,13 @@ namespace FluentDeploy.Components.K8s
             return builder.ToString();
         }
 
+        public string GetAndDumpConfigFile()
+        {
+            var configFile = GetConfigFile();
+            Log.Information(configFile);
+            return configFile;
+        }
+        
         public void ApplyTo(string configPath)
         {
             var configFile = GetConfigFile();
